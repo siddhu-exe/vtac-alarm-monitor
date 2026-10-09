@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+build/
+dist/
+
+# Data (never commit waveforms; only data/sample/README.md is tracked)
+data/*
+!data/sample/
+data/sample/*
+!data/sample/README.md
+*.npz
+*.dat
+*.hea
+*.atr
+
+# Models (artifacts come from Colab via Drive)
+models/*
+!models/.gitkeep
+*.onnx
+*.pt
+*.pth
+*.ubj
+*.joblib
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Env / editor / OS
+.env
+.env.*
+.vscode/
+.idea/
+.DS_Store
+.claude/settings.local.json

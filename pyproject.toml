@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vtac"
+version = "0.1.0"
+description = "ICU VT false-alarm reduction: shared preprocessing, features, and replay backend"
+readme = "README.md"
+requires-python = ">=3.10"
+# Core = only what the shared package needs at train AND serve time. Keep it light.
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "wfdb>=4.1",
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# Colab only: feature extraction, baseline, CNN training, ONNX export.
+# Colab already ships torch, so torch is intentionally NOT pinned here.
+train = [
+  "neurokit2>=0.2.7",
+  "xgboost>=2.0",
+  "scikit-learn>=1.3",
+  "onnx>=1.15",
+  "onnxruntime>=1.17",
+  "onnxmltools>=1.12",
+  "matplotlib>=3.7",
+]
+# Laptop: FastAPI replay + predict backend (CPU only, no torch).
+backend = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.27",
+  "onnxruntime>=1.17",
+  "pydantic>=2.5",
+]
+# Laptop: tests and linting.
+dev = [
+  "pytest>=8.0",
+  "httpx>=0.27",
+  "ruff>=0.4",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+src = ["src", "backend"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
