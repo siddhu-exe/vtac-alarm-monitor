@@ -25,10 +25,10 @@ export class ApiError extends Error {
 }
 
 export interface ApiClient {
-  health(signal?: AbortSignal): Promise<Health>;
-  model(signal?: AbortSignal): Promise<ModelInfo>;
-  alarms(signal?: AbortSignal): Promise<Alarm[]>;
-  alarm(id: string, signal?: AbortSignal): Promise<AlarmDetail>;
+  health: (signal?: AbortSignal) => Promise<Health>;
+  model: (signal?: AbortSignal) => Promise<ModelInfo>;
+  alarms: (signal?: AbortSignal) => Promise<Alarm[]>;
+  alarm: (id: string, signal?: AbortSignal) => Promise<AlarmDetail>;
 }
 
 export function createApiClient(baseUrl: string, fetchFn: typeof fetch = fetch): ApiClient {
