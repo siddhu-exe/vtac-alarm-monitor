@@ -153,6 +153,62 @@ pacing, so there is never a catch-up burst. `seek` is not supported. The message
 
 Full REST and schema details: `docs/api.md`.
 
+## Frontend
+
+`frontend/` — Vite, React 18, TypeScript (strict), Tailwind 3.4, uPlot, Zustand, Zod. Design source:
+`docs/design/live-monitor/` (dark clinical theme; the page always says it is a simulated replay).
+
+**Layers (data flows one way, top to bottom):**
+
+| Layer | Where | Job |
+|---|---|---|
+| Boundary | `src/api`, `src/stream/schemas.ts` | Every REST response and WebSocket frame is parsed with Zod. `parseServerMessage` never throws: a bad frame is counted and dropped, an unknown `type` is ignored (forward compatible). |
+| Stream | `src/stream` | `ReplayClient`: one socket per alarm, reconnect with exponential backoff + jitter (max 10 attempts, then a manual retry), a heartbeat watchdog that is off while paused, no retry for terminal errors (4400/4404/4503), pause/speed re-applied after a reconnect. `ReplayController` wires it to the store and the live buffers, and does auto-advance. |
+| State | `src/store` | Zustand slices (stream, alarms, selection, playback), one store per app instance via a provider (no module-level state). Holds only slow data: connection, alarm list, verdicts, summary, transport. |
+| Live data | `src/features/waveforms` | `LiveBuffers`: typed-array ring buffers (Float32, NaN = missing), quality, numerics and the replay clock, **outside React**. |
+| View | `src/features/*`, `src/app` | Components. Samples never go through React state. |
+
+**Performance model.** A chunk (about 4 per simulated second per channel) is written into a ring
+buffer and requests a frame; one shared `requestAnimationFrame` loop then calls `setData` on each
+strip's single uPlot instance, and only when something arrived. React re-renders only for slow
+events: a verdict, a connection change, and readouts/quality (throttled to 4 Hz). Feed rows are
+memoised, so a verdict re-renders one row. The display is a fixed-axis sweep, so the x-axis does
+not move while the trace fills in.
+
+**Window and axis come from `GET /model`**, never constants: the visible span is
+`[window start − 6 s, window end + 2 s]` (with the defaults 286–304 s, i.e. −14…+4 s around the
+onset), the model input window is `[onset + offset − window_s, onset + offset]` (−8…+2 s). The
+stream request uses the same span as `start_s`/`end_s`.
+
+**Decision logic** lives in `features/alarms/verdict.ts` and is pure: escalate when
+`p_true >= threshold` (inclusive; the threshold comes with each verdict). The summary counts
+decisions against the expert label; the expert label is shown only after the verdict has arrived.
+
+**Design tokens.** All colours, spacing, radii and type sizes are CSS variables in
+`src/design/tokens.css`, exposed through a token-only Tailwind theme (the default palette and scale
+are replaced, so an off-token class does not exist). ESLint rejects hex colours and arbitrary pixel
+values outside the token files. uPlot colours are read from the same variables at runtime. A unit
+test checks the WCAG contrast of the text/background token pairs.
+
+**States.** Loading, empty, offline, reconnecting and failed are shown as a calm banner above the
+dashboard (the layout stays; waveform panel height is reserved), with a *Try again* button only when
+retrying can help. A render crash shows a message and a reload button instead of a blank page.
+
+**Accessibility.** Real buttons; `aria-pressed` on speed and auto-advance; icon buttons have an
+`aria-label`; the feed is an ARIA grid with a roving tabindex (Up/Down/Home/End move, Enter or Space
+selects); visible focus rings; every verdict, quality level and connection state is also written as
+text; skip link; `prefers-reduced-motion` stops the live-dot pulse.
+
+**Environment.** `VITE_API_URL` (default `/api`) and `VITE_WS_URL` (an origin; empty = same
+origin) are validated at start-up. The dev server proxies `/api` and `/ws` to
+`VTAC_BACKEND_URL` (default `http://127.0.0.1:8000`).
+
+**Not in the UI (on purpose).** SpO₂ (no source in the data; the PLETH readout is pulse rate), a
+free-text "reason" for a verdict (nothing in the model produces one), and any claim that a nurse
+was paged. Grad-CAM is a placeholder until checkpoint 2; the contract already allows
+`verdict.attribution`, and the strips and the "Where the model looked" bars render it when it
+appears.
+
 ## Train/serve skew control
 
 `vtac.preprocess` is the only code path from raw WFDB signal to model input. Tests assert that the

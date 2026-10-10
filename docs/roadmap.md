@@ -39,13 +39,17 @@
 - [x] pytest (httpx TestClient, mock mode, synthetic sample) — passing
 
 ### Stage 4 — frontend
-- [ ] Vite + React + TS + Tailwind scaffold
-- [ ] uPlot live waveforms (ECG/PPG/ABP)
-- [ ] Alarm feed (verdict, confidence, suppressed/escalated)
-- [ ] Per-channel signal-quality badge
-- [ ] Summary panel (alarms suppressed, true alarms caught)
-- [ ] Grad-CAM placeholder panel
-- [ ] "Simulated real-time (replayed recordings)" label visible on every view
+- [x] Vite + React + TS + Tailwind scaffold (pnpm; tokens-only theme; strict ESLint incl. jsx-a11y)
+- [x] Backend contract for the UI: `GET /model`, WS pause/resume/speed, `chunk.numerics`, optional `verdict.attribution` (D29, D30)
+- [x] uPlot live waveforms (ECG/PPG/ABP): ring buffers, one instance per strip, shared rAF loop
+- [x] Alarm feed (verdict, confidence, suppressed/escalated), keyboard-navigable
+- [x] Per-channel signal-quality badge; missing-channel strip
+- [x] Summary panel (alarms suppressed/escalated, true alarms caught/missed, false-alarm reduction)
+- [x] Grad-CAM placeholder panel (renders real attribution as soon as the backend sends it)
+- [x] "Simulated real-time (replayed recordings)" label always visible; footer disclaimer
+- [x] Loading / empty / offline / reconnecting / failed states; accessibility pass
+- [x] Tests: ring buffer, verdict mapping, Zod parsing, reconnect logic, VerdictCard, AlarmFeed, missing-channel strip, App integration
+- [ ] Manual check in a real browser on the target laptop (60 fps claim is by design + a CPU probe, not yet measured in-browser)
 
 ### Stage 5 — integrate
 - [ ] Swap MOCK -> real ONNX; verify train/serve parity test
