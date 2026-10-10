@@ -72,14 +72,20 @@ export function GradCamOverlay({ bins, view }: { bins: readonly number[]; view: 
 const TICK_STEP_S = 2;
 
 /** Tick positions every TICK_STEP_S seconds relative to the onset, within the view. */
-export function axisTicks(view: ViewSpan): { left: number; label: string; isOnset: boolean }[] {
-  const ticks: { left: number; label: string; isOnset: boolean }[] = [];
+/** Ticks on multiples of this stay visible on narrow screens. */
+const MAJOR_TICK_S = 4;
+
+export function axisTicks(
+  view: ViewSpan,
+): { left: number; label: string; isOnset: boolean; major: boolean }[] {
+  const ticks: { left: number; label: string; isOnset: boolean; major: boolean }[] = [];
   const first = Math.ceil((view.startS - view.onsetS) / TICK_STEP_S) * TICK_STEP_S;
   for (let d = first; view.onsetS + d <= view.endS + 1e-9; d += TICK_STEP_S) {
     ticks.push({
       left: viewPercent(view, view.onsetS + d),
       label: formatOffset(d),
       isOnset: d === 0,
+      major: d % MAJOR_TICK_S === 0,
     });
   }
   return ticks;
@@ -94,7 +100,7 @@ export function TimeAxis({ view }: { view: ViewSpan | null }) {
           axisTicks(view).map((t) => (
             <span
               key={t.label}
-              className={`absolute top-2 -translate-x-1/2 font-mono text-micro ${t.isOnset ? 'text-onset' : 'text-fg-muted'}`}
+              className={`absolute top-2 -translate-x-1/2 font-mono text-micro ${t.major ? '' : 'hidden roomy:inline'} ${t.isOnset ? 'text-onset' : 'text-fg-muted'}`}
               style={{ left: pct(t.left) }}
             >
               {t.label}

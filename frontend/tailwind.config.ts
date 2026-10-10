@@ -1,5 +1,5 @@
 import type { Config } from 'tailwindcss';
-import { WIDE_BREAKPOINT_PX } from './src/design/breakpoints';
+import { ROOMY_BREAKPOINT_PX, WIDE_BREAKPOINT_PX } from './src/design/breakpoints';
 
 const v = (name: string): string => `var(--${name})`;
 
@@ -13,7 +13,7 @@ function vars(prefix: string, names: readonly string[]): Record<string, string> 
 export default {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
-    screens: { wide: `${WIDE_BREAKPOINT_PX}px` },
+    screens: { roomy: `${ROOMY_BREAKPOINT_PX}px`, wide: `${WIDE_BREAKPOINT_PX}px` },
     colors: {
       transparent: 'transparent',
       current: 'currentColor',
