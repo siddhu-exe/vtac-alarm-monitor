@@ -16,6 +16,8 @@ from backend.app.schemas import (
     AlarmDetailOut,
     AlarmOut,
     HealthOut,
+    ModelMetrics,
+    ModelOut,
     PatientOut,
     PredictIn,
     PredictOut,
@@ -23,6 +25,7 @@ from backend.app.schemas import (
 from backend.app.service import InferenceService
 from backend.app.settings import Settings
 from backend.app.store import Alarm, AlarmStore
+from backend.app.ws_schemas import MAX_SPEED, ErrorMsg
 from vtac.preprocess import preprocess_slots
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(message)s")
@@ -67,6 +70,31 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             model_version=predictor.version if predictor else None,
             n_alarms=len(store),
             synthetic_data=store.synthetic,
+        )
+
+    @app.get("/model", response_model=ModelOut)
+    def model_info() -> ModelOut:
+        cfg = store.cfg
+        runtime = {"mock": "mock predictor (dummy scores)", "onnx": "onnxruntime (CPU)"}
+        extra = cfg.extra
+        return ModelOut(
+            model_mode=settings.model_mode,
+            model_version=predictor.version if predictor else None,
+            runtime=runtime.get(predictor.mode, "unavailable") if predictor else "unavailable",
+            architecture=extra.get("architecture"),
+            baseline=extra.get("baseline"),
+            metrics=ModelMetrics(**extra.get("metrics", {})),
+            fs=cfg.fs,
+            window_s=cfg.window_s,
+            window_end_offset_s=cfg.window_end_offset_s,
+            alarm_onset_s=cfg.alarm_onset_s,
+            segment_s=cfg.segment_samples / cfg.fs,
+            channel_slots=list(cfg.channel_slots),
+            threshold=cfg.threshold,
+            tpr_target=cfg.tpr_target,
+            chunk_s=settings.chunk_s,
+            numerics_every_s=cfg.numerics_every_s,
+            max_speed=MAX_SPEED,
         )
 
     @app.get("/patients", response_model=list[PatientOut])
@@ -139,19 +167,18 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 if a is None
                 else ("model_unavailable", "model not loaded")
             )
-            await ws.send_json({"type": "error", "code": code, "message": msg})
+            await ws.send_json(ErrorMsg(code=code, message=msg).wire())
             await ws.close(code=4404 if a is None else 4503)
             return
         vend = cfg.window_end_index / cfg.fs
         start = cfg.alarm_onset_s - settings.replay_lead_s if start_s is None else start_s
         end = vend + settings.replay_tail_s if end_s is None else end_s
-        if not (0 < speed <= 20) or not (0 <= start <= cfg.alarm_onset_s) or end <= vend:
+        if not (0 < speed <= MAX_SPEED) or not (0 <= start <= cfg.alarm_onset_s) or end <= vend:
             await ws.send_json(
-                {
-                    "type": "error",
-                    "code": "bad_params",
-                    "message": f"need 0<speed<=20, 0<=start_s<=onset, end_s>{vend}",
-                }
+                ErrorMsg(
+                    code="bad_params",
+                    message=f"need 0<speed<={MAX_SPEED:g}, 0<=start_s<=onset, end_s>{vend}",
+                ).wire()
             )
             await ws.close(code=4400)
             return

@@ -107,16 +107,26 @@ Server -> client:
  "model_mode": "onnx|mock", "synthetic": false, "sim": true,
  "label": "simulated real-time (replayed recordings)"}
 
-// 2. repeated, ~every 250 ms of simulated time
-{"type": "chunk", "t0": 12.0, "channels": {"ECG_1": [/* floats */], "PPG": [/* floats */]},
- "quality": {"ECG_1": "good|degraded|bad|absent", "PPG": "good"}}
+// 2. repeated, ~every 250 ms of simulated time. `numerics` (display-only readouts from
+//    vtac.display, over the trailing numerics_window_s) is present on the first chunk and about
+//    once per numerics_every_s after that; a null value means "not measurable right now".
+{"type": "chunk", "t0": 12.0, "channels": {"ECG_1": [/* floats or null */], "PPG": [/* … */]},
+ "quality": {"ECG_1": "good|degraded|bad|absent", "PPG": "good"},
+ "numerics": {"hr_bpm": 84.0, "pr_bpm": 83.5, "abp_sys": 118.0, "abp_dia": 72.0, "abp_map": 87.3}}
 
 // 3. once, right after the chunk that reaches the window end (onset + window_end_offset_s);
-//    computed only from samples up to that point
+//    computed only from samples up to that point. `attribution` is OPTIONAL and omitted in
+//    checkpoint 1 (Grad-CAM, checkpoint 2): per_channel[slot] = one importance in [0,1] per equal
+//    time bin over [t - window_s, t], same bin count for every slot; channel_share sums to 1.
 {"type": "verdict", "alarm_id": "…", "t": 302.0, "p_true": 0.07, "verdict": "FALSE_ALARM",
  "action": "suppressed|escalated", "threshold": 0.31, "latency_ms": 11.2,
  "quality": {"ECG_1": "good"}, "mask": [1, 1, 1, 0],
- "ground_truth": "true|false", "model_mode": "onnx|mock", "model_version": "…"}
+ "ground_truth": "true|false", "model_mode": "onnx|mock", "model_version": "…",
+ "attribution": {"method": "gradcam", "per_channel": {"ECG_1": [0.1, 0.9]},
+                 "channel_share": {"ECG_1": 1.0}}}
+
+// 3b. acknowledgement of every valid control message (the replay starts out playing)
+{"type": "state", "playing": true, "speed": 2.0}
 
 // 4. end of recording
 {"type": "end", "alarm_id": "…"}
@@ -126,8 +136,20 @@ Server -> client:
 ```
 
 `ground_truth` is included only for the demo/summary panel (to show suppressed vs caught); the
-model never sees it. Client -> server: `{"type": "control", "action": "pause|resume|seek", "t": 0}`
-(optional in checkpoint 1; `speed` query param is the minimum).
+model never sees it.
+
+Client -> server (transport control; each valid message is answered with a `state` message, an
+invalid one with a non-terminal `error` of code `bad_control`):
+
+```jsonc
+{"type": "control", "action": "pause"}
+{"type": "control", "action": "resume"}
+{"type": "control", "action": "speed", "speed": 2.0}   // 0 < speed <= max_speed (GET /model)
+```
+
+Pausing stops the stream (no messages, including no chunks, until `resume`); resuming re-bases the
+pacing, so there is never a catch-up burst. `seek` is not supported. The message models live in
+`backend/app/ws_schemas.py` (Pydantic) and are mirrored in the frontend as Zod schemas.
 
 Full REST and schema details: `docs/api.md`.
 

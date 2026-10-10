@@ -40,6 +40,35 @@ class AlarmDetailOut(AlarmOut):
     quality: dict[str, str]
 
 
+class ModelMetrics(BaseModel):
+    test_pr_auc: float | None = None
+    challenge_score: float | None = None
+
+
+class ModelOut(BaseModel):
+    """What the UI needs to interpret a verdict (τ, window, channel order: never hard-coded)."""
+
+    model_mode: str
+    model_version: str | None
+    runtime: str
+    architecture: str | None  # from model_config.json ``extra.architecture`` (None until trained)
+    baseline: str | None  # ``extra.baseline``
+    metrics: ModelMetrics  # ``extra.metrics``; fields are None until 03_cnn has run
+    fs: int
+    window_s: float
+    window_end_offset_s: float
+    alarm_onset_s: float
+    segment_s: float
+    channel_slots: list[str]
+    threshold: float
+    tpr_target: float
+    chunk_s: float  # simulated seconds between WebSocket chunks
+    numerics_every_s: float
+    max_speed: float
+    sim: bool = True
+    label: str = SIM_LABEL
+
+
 class PredictIn(BaseModel):
     alarm_id: str | None = None
     # raw slot-ordered (C, L) samples; the LAST sample is the window end. null = missing sample.

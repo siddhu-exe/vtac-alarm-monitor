@@ -55,6 +55,18 @@ class VtacConfig:
     degraded_flat_frac: float = 0.3
     min_std: float = 1e-6  # std below this after filtering == flat line
 
+    # --- display numerics (vtac.display; shown next to the waveforms, never fed to the model) --
+    numerics_window_s: float = 8.0  # trailing window the HR / pulse rate / ABP numerics use
+    numerics_every_s: float = 1.0  # simulated-time interval between numerics updates
+    numerics_min_beats: int = 3  # fewer detected beats than this -> numeric is unknown (None)
+    numerics_rate_bounds_bpm: tuple[float, float] = (20.0, 300.0)  # outside -> None
+    numerics_abp_bounds_mmhg: tuple[float, float] = (10.0, 300.0)  # outside -> None
+    numerics_ecg_min_rr_s: float = 0.2  # refractory period (caps ECG rate at 300 bpm)
+    numerics_ecg_height_frac: float = 0.5  # QRS peak must exceed this x the 99th pct of |ECG|
+    numerics_pulse_min_rr_s: float = 0.25  # refractory period for PPG / ABP (caps rate at 240)
+    numerics_pulse_prominence_frac: float = 0.3  # of the channel's 5-95th percentile range
+    numerics_pulse_min_autocorr: float = 0.4  # self-similarity one beat later; noise is ~0
+
     # --- decision threshold (filled by notebook 03_cnn; see docs/modeling.md) ------------
     tpr_target: float = 0.95
     threshold: float = 0.5  # operating point used for verdicts (constrained one when available)

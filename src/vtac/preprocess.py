@@ -29,7 +29,7 @@ class ProcessedWindow:
         return {s: q.level for s, q in self.quality.items()}
 
 
-def _fill_nans(x: np.ndarray) -> np.ndarray:
+def fill_nans(x: np.ndarray) -> np.ndarray:
     isnan = ~np.isfinite(x)
     if not isnan.any():
         return x.astype(np.float64)
@@ -51,7 +51,7 @@ def preprocess_slots(
         seg = raw[i, span.ctx_start : span.end].astype(np.float64)
         q = assess_channel(seg[span.start - span.ctx_start :], cfg)
         if q.usable:
-            y = filter_channel(_fill_nans(seg), kind_for_slot(slot), cfg)
+            y = filter_channel(fill_nans(seg), kind_for_slot(slot), cfg)
             win = y[span.start - span.ctx_start :]
             std = float(win.std())
             if std < cfg.min_std:

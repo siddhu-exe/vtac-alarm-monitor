@@ -23,7 +23,7 @@ def feature_names(cfg: VtacConfig) -> list[str]:
     return names
 
 
-def _peaks(x: np.ndarray, fs: int, ecg: bool) -> np.ndarray:
+def detect_peaks(x: np.ndarray, fs: int, ecg: bool) -> np.ndarray:
     ref = np.abs(x) if ecg else x
     dist = int(0.2 * fs)  # refractory period; caps detectable rate at ~300 bpm
     height = np.quantile(ref, 0.90) * (0.5 if ecg else 0.3)
@@ -32,7 +32,7 @@ def _peaks(x: np.ndarray, fs: int, ecg: bool) -> np.ndarray:
 
 
 def _channel_features(x: np.ndarray, ecg: bool, fs: int) -> dict[str, float]:
-    idx = _peaks(x, fs, ecg)
+    idx = detect_peaks(x, fs, ecg)
     f = dict.fromkeys(_PER_CHANNEL, np.nan)
     f["n_peaks"] = float(len(idx))
     if len(idx) >= 3:

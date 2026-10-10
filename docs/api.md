@@ -21,6 +21,25 @@ Config via env vars:
  "synthetic_data": true, "sim": true, "label": "simulated real-time (replayed recordings)"}
 ```
 
+### `GET /model`
+
+Everything the UI needs to interpret a verdict. The frontend reads τ, window offsets and channel
+order from here and never hard-codes them. Works in `degraded` mode too (`model_version` null).
+
+```json
+{"model_mode": "mock", "model_version": "mock-0", "runtime": "mock predictor (dummy scores)",
+ "architecture": null, "baseline": null,
+ "metrics": {"test_pr_auc": null, "challenge_score": null},
+ "fs": 250, "window_s": 10.0, "window_end_offset_s": 2.0, "alarm_onset_s": 300.0,
+ "segment_s": 360.0, "channel_slots": ["ECG_1", "ECG_2", "PPG", "ABP"],
+ "threshold": 0.5, "tpr_target": 0.95, "chunk_s": 0.256, "numerics_every_s": 1.0,
+ "max_speed": 20.0, "sim": true, "label": "simulated real-time (replayed recordings)"}
+```
+
+`architecture`, `baseline` and `metrics` come from `model_config.json` under `extra`
+(`extra.architecture`, `extra.baseline`, `extra.metrics.{test_pr_auc,challenge_score}`) and are
+`null` until `03_cnn` writes them.
+
 ### `GET /patients`
 
 ```json
@@ -82,16 +101,18 @@ Rolling inference latency (count, mean, p50, p95) and verdict counts since start
 ## WebSocket
 
 `WS /ws/replay/{alarm_id}?speed=1.0&start_s=270&end_s=332` — see `docs/architecture.md` for
-message types (`session`, `chunk`, `verdict`, `end`, `error`).
+message types (`session`, `chunk`, `verdict`, `state`, `end`, `error`) and the client `control`
+messages (`pause`, `resume`, `speed`).
 
 | Param | Default | Rule |
 |---|---|---|
-| `speed` | `1.0` | `0 < speed <= 20` |
+| `speed` | `1.0` | `0 < speed <= 20` (also the limit for a `speed` control message) |
 | `start_s` | onset - 30 s | `0 <= start_s <= alarm_onset_s` (replaying all 5 pre-alarm minutes is rarely useful) |
 | `end_s` | window end + 30 s | must be greater than the window end (onset + offset) |
 
 Errors are sent as an `error` message, then the socket closes: unknown alarm -> code 4404
-(`not_found`), bad params -> 4400 (`bad_params`), model not loaded -> 4503.
+(`not_found`), bad params -> 4400 (`bad_params`), model not loaded -> 4503. An invalid `control`
+message gets an `error` with code `bad_control` and the replay carries on (non-terminal).
 
 ## Errors
 
