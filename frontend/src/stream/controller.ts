@@ -122,15 +122,18 @@ export class ReplayController {
   }
 
   togglePlay(): void {
+    const { kind } = this.client.state;
+    const id = this.state.selectedId;
+    if ((kind === 'ended' || kind === 'idle') && id) {
+      // Nothing is streaming: Play means "run this alarm again from the start".
+      this.state.setPlaying(true);
+      this.selectAlarm(id);
+      return;
+    }
     const playing = !this.state.playing;
     this.state.setPlaying(playing);
-    const { kind } = this.client.state;
-    if (playing && (kind === 'ended' || kind === 'idle') && this.state.selectedId) {
-      this.selectAlarm(this.state.selectedId); // replay the alarm from the start
-    } else {
-      this.client.setPlaying(playing);
-      if (!playing) this.cancelAdvance();
-    }
+    this.client.setPlaying(playing);
+    if (!playing) this.cancelAdvance();
   }
 
   setSpeed(speed: ReplaySpeed): void {

@@ -61,3 +61,33 @@ export function summarize(items: readonly DecisionOutcome[]): Summary {
 export function labelOf(truth: GroundTruth): string {
   return truth === 'true' ? 'True alarm' : 'False alarm';
 }
+
+/** Short chip text for the feed: the decision, spelled out (colour is never the only cue). */
+export function decisionChip(action: Action): string {
+  return action === 'escalated' ? 'TRUE · ESCALATED' : 'FALSE · SUPPRESSED';
+}
+
+export function decisionTitle(action: Action): string {
+  return action === 'escalated' ? 'True VT — escalated' : 'False alarm — suppressed';
+}
+
+/** What the decision means for the alarm. The replay never pages anyone. */
+export function decisionNote(action: Action): string {
+  return action === 'escalated' ? 'Alarm kept at full priority' : 'Suppressed · logged for review';
+}
+
+/** Tailwind classes per decision; the border/fill tone pair used across feed, card and summary. */
+export const TONE: Record<Action, { text: string; fill: string; border: string; panel: string }> = {
+  escalated: {
+    text: 'text-escalated',
+    fill: 'bg-escalated',
+    border: 'border-escalated',
+    panel: 'border-line-escalated',
+  },
+  suppressed: {
+    text: 'text-suppressed',
+    fill: 'bg-suppressed',
+    border: 'border-suppressed',
+    panel: 'border-line-suppressed',
+  },
+};

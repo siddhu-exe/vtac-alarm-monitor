@@ -117,6 +117,12 @@ export default {
       maxWidth: { page: v('layout-page-max') },
       minWidth: { feed: v('layout-feed-min') },
       flexBasis: { main: v('layout-main-basis'), sidebar: v('layout-sidebar-basis') },
+      gridTemplateColumns: {
+        feed: v('layout-feed-cols'),
+        attr: v('layout-attr-cols'),
+        card: 'var(--size-card-label) minmax(0, 1fr)',
+      },
+      boxShadow: { 'row-selected': 'inset var(--layout-mark-w) 0 0 var(--color-fg)' },
       outlineWidth: { focus: v('layout-focus-w') },
       keyframes: { vtpulse: { '0%, 100%': { opacity: '1' }, '50%': { opacity: '0.25' } } },
       animation: { live: 'vtpulse 1.4s ease-in-out infinite' },

@@ -16,6 +16,15 @@ export function formatClock(deltaS: number): string {
   return `${sign}${Math.abs(deltaS).toFixed(1)} s`;
 }
 
+/** "−8 s → +2 s": the model input window relative to the alarm onset. */
+export function formatWindow(startRel: number, endRel: number): string {
+  const one = (n: number) => {
+    const body = Number.isInteger(n) ? String(Math.abs(n)) : Math.abs(n).toFixed(1);
+    return `${n < 0 ? MINUS : '+'}${body}`;
+  };
+  return `${one(startRel)} s → ${one(endRel)} s`;
+}
+
 export function formatPercent(p: number): string {
   return `${Math.round(p * 100)}%`;
 }

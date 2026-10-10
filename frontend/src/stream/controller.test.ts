@@ -175,10 +175,20 @@ describe('transport', () => {
     open();
     FakeSocket.last.push(end());
     store.getState().setAutoAdvance(false);
-    ctl.togglePlay(); // pause...
-    ctl.togglePlay(); // ...play again on an ended stream
+    ctl.togglePlay();
     expect(FakeSocket.instances).toHaveLength(2);
     expect(FakeSocket.last.url).toContain('/a1?');
+    expect(store.getState().playing).toBe(true);
+  });
+
+  it('Play after pausing on a finished replay also restarts it', async () => {
+    const { store, ctl } = await setup();
+    open();
+    FakeSocket.last.push(end());
+    store.getState().setPlaying(false);
+    ctl.togglePlay();
+    expect(FakeSocket.instances).toHaveLength(2);
+    expect(store.getState().playing).toBe(true);
   });
 });
 

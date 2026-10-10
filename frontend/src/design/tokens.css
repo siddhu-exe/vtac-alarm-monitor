@@ -126,9 +126,12 @@
   --layout-readout-w: 128px;
   --layout-main-basis: 640px;
   --layout-sidebar-basis: 340px;
-  --layout-feed-min: 760px;
+  --layout-feed-min: 880px;
+  --layout-feed-cols: 84px 72px 96px minmax(0, 1fr) 140px 80px 150px;
+  --layout-attr-cols: 64px minmax(0, 1fr) 40px;
   --layout-line-w: 1px;
   --layout-onset-w: 2px;
   --layout-trace-w: 1.5px;
   --layout-focus-w: 2px;
+  --layout-mark-w: 3px;
 }
