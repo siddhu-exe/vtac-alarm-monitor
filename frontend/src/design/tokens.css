@@ -1,0 +1,134 @@
+/*
+ * Design tokens - the ONLY place raw colour / size values live.
+ * Source: docs/design/live-monitor/Main.dc.html. Components use these through the Tailwind theme
+ * (tailwind.config.ts) or var(--...); an ESLint rule rejects hex colours and arbitrary px values
+ * anywhere else under src/.
+ */
+:root {
+  color-scheme: dark;
+
+  /* surfaces */
+  --color-canvas: #0a0d0d;
+  --color-surface: #111716;
+  --color-surface-sunken: #0d1211;
+  --color-surface-raised: #182120;
+  --color-strip: #0a0f0e;
+  --color-window-fill: #121a18;
+  --color-row-selected: #18221f;
+  --color-segment-off: #141b1a;
+  --color-segment-on: #2a3633;
+  --color-track: #22302d;
+
+  /* lines */
+  --color-line: #1e2826;
+  --color-line-subtle: #1a2321;
+  --color-line-strong: #2a3633;
+  --color-window-edge: #33433f;
+  --color-legend-edge: #3a4a46;
+  --color-line-escalated: #5a3420;
+  --color-line-suppressed: #2a3a5c;
+
+  /* text */
+  --color-fg: #d7e0dd;
+  --color-fg-secondary: #b9c6c2;
+  --color-fg-muted: #8a9a96;
+  --color-fg-strong: #ffffff;
+  --color-fg-on-light: #0a0d0d;
+
+  /* waveform traces */
+  --color-trace-ecg: #4be08a;
+  --color-trace-pleth: #3fc6e8;
+  --color-trace-abp: #f06a5d;
+
+  /* verdicts and overlays */
+  --color-escalated: #ff8a3d;
+  --color-suppressed: #7fa8ff;
+  --color-gradcam: #ffb020;
+  --color-onset: #ff8a3d;
+
+  /* status and interaction */
+  --color-ok: #4be08a;
+  --color-warn: #ffb020;
+  --color-absent: #5e6e6a;
+  --color-focus: #7fa8ff;
+  --color-link: #7fa8ff;
+  --color-link-hover: #a9c4ff;
+
+  /* typography */
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --font-size-micro: 11px;
+  --font-size-caption: 12px;
+  --font-size-body-sm: 13px;
+  --font-size-body: 14px;
+  --font-size-title-sm: 15px;
+  --font-size-title: 16px;
+  --font-size-heading: 18px;
+  --font-size-stat: 26px;
+  --font-size-display: 30px;
+  --leading-none: 1;
+  --leading-tight: 1.1;
+  --leading-normal: 1.5;
+  --tracking-title: 0.01em;
+  --tracking-chip: 0.04em;
+  --tracking-head: 0.05em;
+  --tracking-badge: 0.06em;
+
+  /* spacing (2px base; keys follow the Tailwind scale, 1 = 4px) */
+  --space-px: 1px;
+  --space-0-5: 2px;
+  --space-1: 4px;
+  --space-1-5: 6px;
+  --space-2: 8px;
+  --space-2-5: 10px;
+  --space-3: 12px;
+  --space-3-5: 14px;
+  --space-4: 16px;
+  --space-4-5: 18px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* radii */
+  --radius-hair: 1px;
+  --radius-track: 3px;
+  --radius-chip: 4px;
+  --radius-bar: 5px;
+  --radius-button: 6px;
+  --radius-panel: 8px;
+
+  /* component sizes */
+  --size-dot: 7px;
+  --size-dot-lg: 8px;
+  --size-swatch-w: 14px;
+  --size-swatch-h: 10px;
+  --size-bar: 6px;
+  --size-bar-lg: 10px;
+  --size-bar-track: 70px;
+  --size-icon-sm: 14px;
+  --size-icon: 16px;
+  --size-logo: 30px;
+  --size-control: 40px;
+  --size-control-sm: 38px;
+  --size-control-min: 44px;
+  --size-speed-min: 48px;
+  --size-play-min: 104px;
+  --size-row-min: 48px;
+  --size-attr-name: 64px;
+  --size-attr-pct: 40px;
+  --size-card-label: 120px;
+
+  /* layout */
+  --layout-page-max: 1440px;
+  --layout-strip-h: 96px;
+  --layout-time-axis-h: 30px;
+  --layout-label-w: 104px;
+  --layout-readout-w: 128px;
+  --layout-main-basis: 640px;
+  --layout-sidebar-basis: 340px;
+  --layout-feed-min: 760px;
+  --layout-line-w: 1px;
+  --layout-onset-w: 2px;
+  --layout-trace-w: 1.5px;
+  --layout-focus-w: 2px;
+}
