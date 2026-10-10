@@ -84,7 +84,12 @@ export default {
         'attr-pct',
         'card-label',
       ]),
-      ...vars('layout', ['strip-h', 'time-axis-h', 'label-w', 'readout-w', 'onset-w', 'line-w']),
+      ...Object.fromEntries(
+        ['strip-h', 'time-axis-h', 'label-w', 'readout-w', 'onset-w', 'line-w'].map((n) => [
+          n.replace(/-[hw]$/, ''),
+          v(`layout-${n}`),
+        ]),
+      ),
     },
     borderRadius: {
       none: '0px',
