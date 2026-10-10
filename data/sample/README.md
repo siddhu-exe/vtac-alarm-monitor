@@ -7,5 +7,5 @@ This directory is gitignored except for this README. Do not commit waveforms.
 
 Expected contents (see `docs/architecture.md` for the exact schema):
 
-- `replay_sample.npz` — raw (unwindowed, unfiltered) 10-minute segments for the sample alarms, plus metadata
+- `replay_sample.npz` — raw (unwindowed, unfiltered) 6-minute segments, slot-ordered `(N, 4, 90000)` at 250 Hz, NaN = absent slot, for the sample alarms, plus metadata
 - `replay_index.json` — per-alarm metadata (event id, patient id, label, channel names, sampling rates)

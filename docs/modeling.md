@@ -57,25 +57,42 @@ Fill with validation numbers during development; the final row set is re-run on 
 | C3 | ResNet1D | ECG + pulsatile | focal loss | – | | | | | | | |
 | C4 | best of C2/C3 | ECG + pulsatile | best | channel dropout | | | | | | | |
 
+**Channel ablation** (same model, mask changes; PPG and ABP are separate slots):
+
+| ID | Channels in mask | PR-AUC | ROC-AUC | TPR | PPV | Challenge Score | Notes |
+|---|---|---|---|---|---|---|---|
+| K0 | ECG only | | | | | | |
+| K1 | ECG + PPG | | | | | | |
+| K2 | ECG + ABP | | | | | | |
+| K3 | ECG + PPG + ABP | | | | | | |
+
+**Window ablation** (`window_end_offset_s`; every other setting fixed):
+
+| ID | Offset | Meaning | PR-AUC | ROC-AUC | TPR | PPV | Challenge Score | Notes |
+|---|---|---|---|---|---|---|---|---|
+| W0 | 0.0 s | official benchmark window (10 s ending at onset); comparable to published results | | | | | | |
+| W1 | +2.0 s | project default (D18) | | | | | | |
+
 Also report performance stratified by channel availability (ECG-only records vs with-pulsatile
 records) — fusion gains should show up where pulsatile channels exist.
 
 ## Threshold method
 
-Goal: minimize the cost where a missed true alarm costs 5 false alarms (the 2015 Challenge Score
-weighting).
+Goal: minimise cost where a missed true alarm costs 5 false alarms (Challenge Score weighting),
+under a **hard safety constraint: validation TPR >= 0.95** (decided 2026-10-09, D20).
 
-1. Fit the model on train; get validation probabilities `p_true`.
-2. Sweep candidate thresholds over the validation set; at each compute TP/TN/FP/FN.
-3. Choose the threshold that **maximizes the Challenge Score** `(TP+TN)/(TP+TN+FP+5*FN)`
-   (equivalently minimizes `FP + 5*FN`). Tie-break toward higher TPR.
-4. Optional safety constraint: require validation TPR >= a target (e.g., 0.95+) and pick the best
-   score subject to it; document the target in `docs/decisions.md`.
-5. Smooth the choice (bootstrap / pick the center of a near-optimal plateau) to avoid overfitting a
-   single noisy optimum.
-6. Save `threshold` into `model_config.json` (and `vtac.config` default). The backend reads it from
-   the config, never hardcodes it.
-7. Apply once to the test set and report; **never** retune on test.
+1. Fit on train; get validation probabilities `p_true`.
+2. Sweep every distinct score as a candidate threshold (`vtac.metrics.threshold_sweep`).
+3. **Unconstrained threshold:** maximise the Challenge Score. Tie-break toward higher TPR.
+4. **Constrained threshold (the one the backend uses):** among thresholds with TPR >= 0.95, maximise
+   the Challenge Score. Predicting everything true always has TPR 1.0, so a feasible point exists.
+5. **Report both** (`vtac.metrics.tune_thresholds` returns both with full metrics) and store both in
+   `model_config.json` (`threshold_constrained`, `threshold_unconstrained`); `threshold` is set to the
+   constrained one.
+6. Optional smoothing: `plateau_tol` > 0 picks the median threshold of the near-optimal plateau
+   instead of a single noisy argmax.
+7. Apply to the test set once and report; **never** retune on test. Report test TPR as an estimate,
+   not a guarantee, with patient-level bootstrap CIs (`group_bootstrap_ci`).
 
 ## Reproducibility
 

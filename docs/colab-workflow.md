@@ -11,7 +11,7 @@ drive.mount("/content/drive")
 
 # Install the shared package from GitHub, pinned to a ref (tag/commit) for reproducibility
 VTAC_REF = "main"   # replace with a tag/commit once stable
-!pip -q install "vtac[train] @ git+https://github.com/<user>/<repo>.git@{VTAC_REF}"
+!pip -q install "vtac[train] @ git+https://github.com/siddhu-exe/vtac-alarm-monitor.git@{VTAC_REF}"
 
 import vtac, subprocess
 print("vtac", vtac.__version__)
@@ -29,15 +29,17 @@ print("vtac", vtac.__version__)
 MyDrive/vtac/
   raw/                  # downloaded VTaC (optional cache; large)
   processed/
-    windows.npz         # windows, mask, labels, split, event/patient ids (compressed)
-    windows_meta.json   # shapes, fs, channel slots, vtac ref, data version, seeds
+    windows_off2.0.npz  # project-default window (end offset +2.0 s): signals, mask, y, split, ids
+    windows_off0.0.npz  # official-benchmark window (offset 0.0 s) for ablation W0
+    windows_meta.json   # counts, seeds, offsets, vtac ref, data version
+    baseline_features_off*.pkl
   replay/
     replay_sample.npz   # ~25 test alarms, raw segments for the laptop
     replay_index.json
   models/
     xgb_baseline.*      # optional
     model.onnx
-    model_config.json   # threshold, channel slots, input shape, metrics, vtac ref
+    model_config.json   # = VtacConfig.to_dict(): both thresholds, slots, input shape, metrics, vtac ref
   reports/              # figures, metrics tables
 ```
 
@@ -45,9 +47,9 @@ MyDrive/vtac/
 
 | Notebook | Reads | Writes |
 |---|---|---|
-| `01_data_prep` | PhysioNet download | `processed/windows.npz`, `windows_meta.json`, `replay/*`, findings for `docs/data.md` |
-| `02_baseline` | `processed/windows.npz` | baseline metrics, feature importances |
-| `03_cnn` | `processed/windows.npz` | `models/model.onnx`, `models/model_config.json`, metrics, ablation rows |
+| `01_data_prep` | PhysioNet download | `processed/windows_off{2.0,0.0}.npz`, `windows_meta.json`, `replay/*`, `reports/data_survey.json` (paste into `docs/data.md`) |
+| `02_baseline` | `processed/windows_off*.npz` | `reports/baseline_metrics_off*.json`, feature importances |
+| `03_cnn` | `processed/windows_off*.npz` | `models/model.onnx`, `models/model_config.json`, `reports/cnn_val_ablation_off*.csv` |
 
 Use a GPU runtime for `03_cnn` only. Save intermediate checkpoints to Drive so a disconnect does
 not lose work. Run long cells in chunks; write results incrementally.
@@ -58,12 +60,14 @@ not lose work. Run long cells in chunks; write results incrementally.
    - `models/model.onnx`, `models/model_config.json` -> repo `models/`
    - `replay/replay_sample.npz`, `replay/replay_index.json` -> repo `data/sample/`
 2. Files are gitignored; do not commit them.
-3. Start the backend (`VTAC_MODEL_MODE=onnx`); `/health` should report the model version.
-4. Never copy `windows.npz` or raw data to the laptop; it is large and not needed to serve.
+3. Start the backend (`VTAC_MODEL_MODE=onnx`, once the ONNX loader lands; until then `mock`); `/health` should report the model version.
+4. Never copy `windows_off*.npz` or raw data to the laptop; it is large and not needed to serve.
 
 ## 5. Rules
 
 - Preprocessing code is imported from `vtac`; do not paste/duplicate it in notebooks.
-- Fix random seeds and log them in `windows_meta.json` / `model_config.json`.
+- Fix random seeds (`SEED = 42`) and log them in `windows_meta.json` / `model_config.json`.
+- Run `02_baseline` and `03_cnn` twice, with `OFFSET = 2.0` and `OFFSET = 0.0`, for the window ablation (W1 vs W0).
+- The notebooks were written without being executed; the first Colab run is also a debugging run.
 - Notebooks must run top-to-bottom from a fresh runtime (clear outputs before committing).
 - Large notebook outputs/figures go to `reports/` on Drive, not the repo.

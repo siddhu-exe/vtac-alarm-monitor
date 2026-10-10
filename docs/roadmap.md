@@ -9,32 +9,34 @@
 - [x] Repo structure, `.gitignore`, `pyproject.toml`, README
 - [x] `CLAUDE.md`
 - [x] docs: architecture, data, modeling, api, roadmap, decisions, colab-workflow
-- [ ] **User review of skeleton/docs** (gate)
+- [x] **User review of skeleton/docs** (gate) — approved 2026-10-09
 
 ### Stage 1 — shared package `src/vtac/`
-- [ ] `config.py` (dataclasses; fs, window, channel slots/priority, thresholds — filled from verified data)
-- [ ] `io.py` WFDB loading (header-driven channel/fs discovery, no hardcoded names)
-- [ ] `filters.py` bandpass (per modality)
-- [ ] `windows.py` 10 s window extraction around alarm onset
-- [ ] `channels.py` channel selection + missing-channel mask + quality flags
-- [ ] `features.py` baseline features (neurokit2, imported lazily; Colab only)
-- [ ] `preprocess.py` single entry point raw record -> `(signals, mask)`
-- [ ] `metrics.py` PR-AUC, ROC-AUC, TPR, PPV, Challenge Score, threshold tuning
-- [ ] pytest on synthetic signals
+- [x] `config.py` (dataclasses; fs, window, channel slots/priority, thresholds — filled from verified data)
+- [x] `io.py` WFDB loading (header-driven channel/fs discovery, no hardcoded names)
+- [x] `filters.py` bandpass (per modality)
+- [x] `windows.py` 10 s window extraction around alarm onset
+- [x] `channels.py` channel selection + missing-channel mask + quality flags
+- [x] `features.py` baseline features (neurokit2, imported lazily; Colab only) _(scipy features only; neurokit2 HRV is added in `02_baseline`)_
+- [x] `preprocess.py` single entry point raw record -> `(signals, mask)`
+- [x] `splits.py` patient-level check + grouped/stratified validation carve-out; `dataset.py` npz I/O; `synthetic.py` demo/test signals
+- [x] `metrics.py` PR-AUC, ROC-AUC, TPR, PPV, Challenge Score, threshold tuning
+- [x] pytest on synthetic signals — 36 passed, 0 skipped on 2026-10-09 (incl. wfdb I/O, split carving, ONNX loader)
 
 ### Stage 2 — Colab notebooks
-- [ ] `01_data_prep`: download, verify (fill `docs/data.md` Findings), preprocess, save `windows.npz`, export ~25-alarm replay sample
-- [ ] `02_baseline`: neurokit2 features + XGBoost
-- [ ] `03_cnn`: ResNet1D, ECG-only vs ECG+pulsatile, weighted sampling/focal loss, ONNX export, threshold -> `model_config.json`
-- [ ] Fill ablation table in `docs/modeling.md`
+- [ ] Before `01_data_prep`: window ablation plan W0 (offset 0.0) vs W1 (default) is in `docs/modeling.md`
+- [x] `01_data_prep` **written, not yet run on Colab**: download, verify (fill `docs/data.md` Findings), preprocess both offsets, export ~25-alarm replay sample
+- [x] `02_baseline` **written, not yet run**: neurokit2 + vtac features, XGBoost, B0/B1
+- [x] `03_cnn` **written, not yet run**: ResNet1D, C0-C4 + K1/K2 ablations, ONNX export + parity check, thresholds -> `model_config.json`
+- [ ] Run all three on Colab; fix first-run issues; fill the tables in `docs/modeling.md`
 
 ### Stage 3 — backend
-- [ ] App skeleton, config, `/health`, `/patients`, `/alarms`
-- [ ] MOCK model mode
-- [ ] ONNX model wrapper (onnxruntime CPU) + latency logging
-- [ ] `/predict`
-- [ ] WebSocket replay (session/chunk/verdict/end)
-- [ ] pytest (httpx TestClient, mock mode, synthetic sample)
+- [x] App skeleton, config, `/health`, `/patients`, `/alarms`
+- [x] MOCK model mode
+- [x] ONNX model wrapper (`OnnxPredictor`, onnxruntime CPU) + latency logging — loader written; its test needs `onnx` installed; **untested against a real trained model**
+- [x] `/predict`
+- [x] WebSocket replay (session/chunk/verdict/end)
+- [x] pytest (httpx TestClient, mock mode, synthetic sample) — passing
 
 ### Stage 4 — frontend
 - [ ] Vite + React + TS + Tailwind scaffold

@@ -42,22 +42,28 @@
 Values marked **TBD** are fixed after data verification (`docs/data.md`) and then written to
 `model_config.json`; the backend reads that file rather than hardcoding.
 
-**Window:** 10 s centered/anchored around alarm onset per `config` (default: the 10 s ending at
-alarm onset + `post_onset_s` TBD; decided in `01_data_prep` and recorded in `docs/decisions.md`).
+**Segments (verified):** 90,000 samples at 250 Hz = 360 s (5 min before alarm onset + 1 min after);
+onset at sample 75,000 (t = 300 s). All channels are resampled to 250 Hz by the dataset authors.
+
+**Window:** `window_s = 10` s ending at `alarm_onset_s + window_end_offset_s`. The offset is
+configurable (`vtac.config.VtacConfig`). Offset `0.0` reproduces the official benchmark window
+(samples 72,500:75,000); the default is `2.0` s (D18/D19). `T = 2500` samples. Windows never extend
+before the alarm plus the offset, so the verdict can be produced at (onset + offset) in a live replay.
 
 **Input**
 
 | Name | Shape | dtype | Notes |
 |---|---|---|---|
-| `signals` | `(N, C, T)` | float32 | `C` = fixed channel slots, `T = window_s * fs` (TBD after verification) |
-| `mask` | `(N, C)` | float32 | 1.0 = channel present and usable, 0.0 = missing |
+| `signals` | `(N, 4, 2500)` | float32 | filtered, per-channel z-scored; zeros where the channel is missing |
+| `mask` | `(N, 4)` | float32 | 1.0 = channel present and usable, 0.0 = missing |
 
-**Channel order (slots, fixed):** `[ECG_1, ECG_2, PPG, ABP]` — proposed. Exact source channel names
-are mapped to these slots in `vtac.config` after verification (record names vary across records).
-Missing channels are zero-filled and masked; they are never silently imputed.
+**Channel order (slots, fixed):** `[ECG_1, ECG_2, PPG, ABP]`. This matches the layout the official
+benchmark code uses (indices 0,1 = ECG, 2 = PPG, 3 = ABP). PPG and ABP are separate slots so the
+ECG-only / +PPG / +ABP ablation is just a mask. Source channel names come from each record header and
+are mapped to slots in `vtac.channels.select_slots`.
 
-Per-channel normalization (e.g., robust z-score per window) is applied in `vtac`, before the model;
-the ONNX graph takes already-normalized input.
+All preprocessing (filters, interpolation, window, z-score, mask) is `vtac.preprocess`; the ONNX
+graph takes already-processed input.
 
 **Output**
 
@@ -66,46 +72,51 @@ the ONNX graph takes already-normalized input.
 | `logit` | `(N, 1)` | raw score; `p_true = sigmoid(logit)` |
 
 Verdict = `TRUE_ALARM` if `p_true >= threshold` else `FALSE_ALARM`; `threshold` comes from
-`model_config.json` (tuned for the 1:5 cost). Opset and dynamic batch axis set at export.
+`model_config.json` (the TPR-constrained operating point, see `docs/modeling.md`). Opset and dynamic
+batch axis set at export.
 
 `model_config.json` (written by `03_cnn`):
 
 ```json
 {
   "model_version": "cnn-ecg-ppg-v1",
-  "fs": null,
-  "window_s": 10,
+  "fs": 250, "window_s": 10.0, "window_end_offset_s": 2.0,
   "channel_slots": ["ECG_1", "ECG_2", "PPG", "ABP"],
-  "input_shape": ["N", 4, null],
-  "threshold": null,
-  "metrics": {"val": {}, "test": {}},
-  "vtac_git_ref": null
+  "input_shape": ["N", 4, 2500],
+  "tpr_target": 0.95,
+  "threshold": 0.31,
+  "threshold_constrained": 0.31,
+  "threshold_unconstrained": 0.44,
+  "vtac_git_ref": "<commit>"
 }
 ```
 
 ## WebSocket message schema
 
-Endpoint: `WS /ws/replay/{alarm_id}?speed=1.0`. All messages are JSON with a `type` field and a
+Endpoint: `WS /ws/replay/{alarm_id}?speed=1.0&start_s=&end_s=` (params in `docs/api.md`). All messages are JSON with a `type` field and a
 `sim` flag making the simulated nature explicit. Times are seconds relative to segment start
-(`t`), where alarm onset is at `alarm_onset_s` (5 min = 300 s expected; verify).
+(`t`); alarm onset is at `alarm_onset_s` = 300 s, the segment is 360 s long.
 
 Server -> client:
 
 ```jsonc
 // 1. once, on connect
-{"type": "session", "alarm_id": "…", "patient_id": "…", "fs": {"ECG_1": 250, "PPG": 125},
- "channels": ["ECG_1","ECG_2","PPG"], "alarm_onset_s": 300.0, "duration_s": 600.0,
- "speed": 1.0, "model_mode": "onnx|mock", "sim": true,
+{"type": "session", "alarm_id": "…", "patient_id": "…", "fs": {"ECG_1": 250, "PPG": 250},
+ "channels": ["ECG_1","ECG_2","PPG"], "alarm_onset_s": 300.0, "window_end_s": 302.0,
+ "duration_s": 360.0, "start_s": 270.0, "end_s": 332.0, "speed": 1.0,
+ "model_mode": "onnx|mock", "synthetic": false, "sim": true,
  "label": "simulated real-time (replayed recordings)"}
 
 // 2. repeated, ~every 250 ms of simulated time
 {"type": "chunk", "t0": 12.0, "channels": {"ECG_1": [/* floats */], "PPG": [/* floats */]},
  "quality": {"ECG_1": "good|degraded|bad|absent", "PPG": "good"}}
 
-// 3. once when replay time reaches alarm onset (+ the data needed for the window)
-{"type": "verdict", "alarm_id": "…", "t": 305.0, "p_true": 0.07, "verdict": "FALSE_ALARM",
+// 3. once, right after the chunk that reaches the window end (onset + window_end_offset_s);
+//    computed only from samples up to that point
+{"type": "verdict", "alarm_id": "…", "t": 302.0, "p_true": 0.07, "verdict": "FALSE_ALARM",
  "action": "suppressed|escalated", "threshold": 0.31, "latency_ms": 11.2,
- "ground_truth": "true|false", "model_mode": "onnx|mock"}
+ "quality": {"ECG_1": "good"}, "mask": [1, 1, 1, 0],
+ "ground_truth": "true|false", "model_mode": "onnx|mock", "model_version": "…"}
 
 // 4. end of recording
 {"type": "end", "alarm_id": "…"}
@@ -122,5 +133,7 @@ Full REST and schema details: `docs/api.md`.
 
 ## Train/serve skew control
 
-`vtac.preprocess` is the only code path from raw WFDB signal to model input. Tests assert that
-the backend path and the notebook path produce identical tensors for the same synthetic record.
+`vtac.preprocess` is the only code path from raw WFDB signal to model input. Tests assert that the
+named-channel path (notebooks), the slot-array path (replay sample) and the explicit-window path
+(`POST /predict` with raw samples) produce identical tensors for the same synthetic record
+(`tests/test_preprocess.py`).

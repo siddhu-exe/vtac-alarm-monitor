@@ -41,15 +41,15 @@ Artifacts flow Colab -> Google Drive -> laptop (`models/`, `data/sample/`). See
 Local (laptop) only; nothing here is heavy.
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
-pip install -e ".[backend,dev]"          # light: no torch, no xgboost, no neurokit2
-pytest                                    # small synthetic fixtures only
-ruff check . && ruff format --check .
-uvicorn backend.app.main:app --reload     # add VTAC_MODEL_MODE=mock for dummy predictions
+uv venv --python 3.11 .venv && source .venv/bin/activate   # Python 3.11 (see .python-version)
+uv pip install -e ".[backend,dev]"        # light: no torch, no xgboost, no neurokit2
+uv run pytest                             # small synthetic fixtures only
+uv run ruff check . && uv run ruff format --check .
+VTAC_MODEL_MODE=mock uv run uvicorn backend.app.main:app --reload   # mock is the default for now
 cd frontend && npm install && npm run dev
 ```
 
-Colab: `pip install "vtac[train] @ git+https://github.com/<user>/<repo>.git@<ref>"` (see
+Colab: `pip install "vtac[train] @ git+@<ref>"` (see
 `docs/colab-workflow.md`). Commands above are targets; they work once the corresponding code exists.
 
 ## Conventions
