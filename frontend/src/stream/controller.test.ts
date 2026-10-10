@@ -80,6 +80,34 @@ describe('bootstrap', () => {
   });
 });
 
+describe('lifecycle', () => {
+  it('ignores a bootstrap that finishes after dispose (React StrictMode mounts twice)', async () => {
+    let release: (m: typeof MODEL) => void = () => undefined;
+    const api = fakeApi({
+      model: vi.fn().mockReturnValue(
+        new Promise<typeof MODEL>((resolve) => {
+          release = resolve;
+        }),
+      ),
+    });
+    const store = createAppStore();
+    const ctl = new ReplayController({
+      api,
+      store,
+      live: fakeLive(),
+      wsUrl: '',
+      location: LOC,
+      createSocket: (url) => new FakeSocket(url),
+    });
+    const pending = ctl.bootstrap();
+    ctl.dispose();
+    release(MODEL);
+    await pending;
+    expect(store.getState().bootstrap.status).toBe('loading'); // never flipped to ready
+    expect(FakeSocket.instances).toHaveLength(0);
+  });
+});
+
 describe('streaming into the store and the live sink', () => {
   it('routes session, chunks and verdicts to the right place', async () => {
     const { store, live } = await setup();

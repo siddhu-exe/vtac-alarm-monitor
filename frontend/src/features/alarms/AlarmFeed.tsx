@@ -45,6 +45,7 @@ export function AlarmFeed({ onSelect }: Props) {
   const byId = useAppStore((s) => s.byId);
   const verdicts = useAppStore((s) => s.verdicts);
   const selectedId = useAppStore((s) => s.selectedId);
+  const bootstrap = useAppStore((s) => s.bootstrap.status);
 
   // One row is always reachable with Tab: the selected one, else the first.
   const tabbableId = selectedId && selectedId in byId ? selectedId : order[0];
@@ -96,7 +97,11 @@ export function AlarmFeed({ onSelect }: Props) {
         </div>
         {order.length === 0 && (
           <p className="m-0 border-t border-line px-4 py-6 text-center text-body-sm text-fg-muted">
-            No alarms to replay. The backend returned an empty list.
+            {bootstrap === 'ready'
+              ? 'No alarms to replay. The backend returned an empty list.'
+              : bootstrap === 'error'
+                ? 'The alarm list could not be loaded.'
+                : 'Loading alarms…'}
           </p>
         )}
       </div>

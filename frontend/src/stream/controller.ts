@@ -45,6 +45,8 @@ export class ReplayController {
   private readonly advanceDelayMs: number;
   private advanceTimer: ReturnType<typeof setTimeout> | null = null;
   private view: ViewSpan | null = null;
+  /** Bumped by every bootstrap and by dispose, so a bootstrap that lost the race is ignored. */
+  private generation = 0;
 
   constructor(private readonly deps: ControllerDeps) {
     this.now = deps.now ?? Date.now;
@@ -77,13 +79,16 @@ export class ReplayController {
   }
 
   async bootstrap(): Promise<void> {
+    const gen = ++this.generation;
     this.state.setBootstrap({ status: 'loading' });
     try {
       const [model, alarms] = await Promise.all([this.deps.api.model(), this.deps.api.alarms()]);
+      if (gen !== this.generation) return;
       this.state.setBootstrapReady(model, alarms);
       const first = alarms[0];
       if (first) this.selectAlarm(first.alarm_id);
     } catch (e) {
+      if (gen !== this.generation) return;
       const kind = e instanceof ApiError ? e.kind : 'network';
       const message = e instanceof Error ? e.message : 'Unknown error';
       this.state.setBootstrap({ status: 'error', kind, message });
@@ -150,6 +155,7 @@ export class ReplayController {
   }
 
   dispose(): void {
+    this.generation += 1;
     this.cancelAdvance();
     this.client.disconnect();
   }

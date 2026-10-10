@@ -116,6 +116,7 @@ export default {
     extend: {
       maxWidth: { page: v('layout-page-max') },
       minWidth: { feed: v('layout-feed-min') },
+      flexGrow: { main: '999' },
       flexBasis: { main: v('layout-main-basis'), sidebar: v('layout-sidebar-basis') },
       gridTemplateColumns: {
         feed: v('layout-feed-cols'),

@@ -27,7 +27,7 @@ export function VerdictCard() {
         aria-label="Model verdict"
         className="rounded-panel border border-line bg-surface p-4.5"
       >
-        <div className={EYEBROW}>MODEL VERDICT</div>
+        <h2 className={`m-0 font-normal ${EYEBROW}`}>MODEL VERDICT</h2>
         <p className="m-0 mt-3 text-body text-fg-muted">No alarm selected.</p>
       </section>
     );
@@ -48,7 +48,7 @@ export function VerdictCard() {
         tone ? tone.panel : 'border-line'
       }`}
     >
-      <div className={EYEBROW}>MODEL VERDICT · RECORD {selectedId}</div>
+      <h2 className={`m-0 font-normal ${EYEBROW}`}>MODEL VERDICT · RECORD {selectedId}</h2>
       <div aria-live="polite">
         {record && tone ? (
           <>

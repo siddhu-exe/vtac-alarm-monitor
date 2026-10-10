@@ -25,6 +25,9 @@
     outline: var(--layout-focus-w) solid var(--color-focus);
     outline-offset: var(--space-0-5);
   }
+  [role='row'][tabindex]:focus-visible {
+    outline-offset: calc(var(--layout-focus-w) * -1);
+  }
   @media (prefers-reduced-motion: reduce) {
     * {
       animation-duration: 0.01ms !important;

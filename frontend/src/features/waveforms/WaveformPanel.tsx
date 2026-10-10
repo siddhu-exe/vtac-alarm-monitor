@@ -16,6 +16,30 @@ function LegendItem({ children, swatch }: { children: string; swatch: string }) 
   );
 }
 
+const PLACEHOLDER_STRIPS = 4;
+
+/** Reserves the panel's height while the backend is unreachable or still loading (no layout jump). */
+function WaveformPlaceholder({ failed }: { failed: boolean }) {
+  return (
+    <section
+      aria-label="Waveforms"
+      className="overflow-hidden rounded-panel border border-line bg-surface-sunken"
+    >
+      <div className="px-4 pb-3 pt-3.5">
+        <h2 className="m-0 text-title font-semibold">Waveforms</h2>
+        <p className="m-0 mt-1 text-caption text-fg-muted">
+          {failed
+            ? 'Waveforms are unavailable until the backend responds.'
+            : 'Waiting for the backend…'}
+        </p>
+      </div>
+      {Array.from({ length: PLACEHOLDER_STRIPS }, (_, i) => (
+        <div key={i} className="h-strip border-t border-line-subtle bg-strip" aria-hidden="true" />
+      ))}
+    </section>
+  );
+}
+
 export function WaveformPanel({ live }: { live: LiveBuffers }) {
   const modelInfo = useAppStore((s) => s.modelInfo);
   const selectedId = useAppStore((s) => s.selectedId);
@@ -36,6 +60,8 @@ export function WaveformPanel({ live }: { live: LiveBuffers }) {
     };
   }, [live, scheduler]);
 
+  const bootstrapFailed = useAppStore((s) => s.bootstrap.status === 'error');
+
   const view = useMemo(() => (modelInfo ? computeView(modelInfo) : null), [modelInfo]);
   const specs = useMemo(
     () => buildStripSpecs(modelInfo?.channel_slots ?? [], detail?.sources),
@@ -43,6 +69,8 @@ export function WaveformPanel({ live }: { live: LiveBuffers }) {
   );
   // Prefer the live session; before it arrives the alarm list already says what was recorded.
   const recordedSlots = session?.channels ?? alarm?.channels ?? [];
+
+  if (!modelInfo) return <WaveformPlaceholder failed={bootstrapFailed} />;
 
   return (
     <section
