@@ -40,6 +40,8 @@ MyDrive/vtac/
     xgb_baseline.*      # optional
     model.onnx
     model_config.json   # = VtacConfig.to_dict(): both thresholds, slots, input shape, metrics, vtac ref
+    parity_batch.npz    # ~32 fixed test windows + PyTorch scores, for tests/test_onnx_parity.py
+    model_state.pt      # PyTorch weights of the final model (not committed)
   reports/              # figures, metrics tables
 ```
 
@@ -57,7 +59,7 @@ not lose work. Run long cells in chunks; write results incrementally.
 ## 4. Exporting to the laptop
 
 1. Download from Drive (web UI, `rclone`, or Drive desktop sync):
-   - `models/model.onnx`, `models/model_config.json` -> repo `models/`
+   - `models/model.onnx`, `models/model_config.json`, `models/parity_batch.npz` -> repo `models/`
    - `replay/replay_sample.npz`, `replay/replay_index.json` -> repo `data/sample/`
 2. Files are gitignored; do not commit them.
 3. Start the backend (`VTAC_MODEL_MODE=onnx`, once the ONNX loader lands; until then `mock`); `/health` should report the model version.
