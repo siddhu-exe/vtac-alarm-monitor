@@ -30,6 +30,10 @@ models/*
 *.ubj
 *.joblib
 
+# Raw PhysioNet download / dataset archives (large; Colab handles these)
+physionet.org/
+vtac.zip
+
 # Frontend
 frontend/node_modules/
 frontend/dist/
