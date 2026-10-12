@@ -55,7 +55,9 @@
 ### Stage 5 — integrate
 - [x] Swap MOCK -> real ONNX: backend runs with `VTAC_MODEL_MODE=onnx` (2026-10-12; first verdict ~63 ms total, preprocess ~37 ms + infer ~26 ms)
 - [x] Offline sample check on all 25 alarms: 9/10 true escalated, 12/15 false suppressed (one missed: `a06fbf_0500`, p=0.476 vs thr 0.515)
-- [ ] Train/serve parity: compare torch vs ONNX scores on a fixed batch saved from the `03_cnn` notebook (only a loose sanity test exists in the repo)
+- [ ] Train/serve parity: `03_cnn` cell 5 exports `parity_batch.npz` (run in the training session, no retraining); `tests/test_onnx_parity.py` is written and skips until the file is in `models/` (PyTorch weights were not saved, so this needs the original Colab runtime)
+- [x] Demo script: `docs/demo.md` (4 alarms, order, what to point at)
+- [x] Sign-off checklist: `docs/checkpoint1-signoff.md`
 - [ ] End-to-end demo on the ~25-alarm sample
 
 ## Checkpoint 2 (out of scope for now)

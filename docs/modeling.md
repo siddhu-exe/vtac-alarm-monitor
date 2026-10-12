@@ -121,5 +121,7 @@ Not yet filled: B0/B1, C0-C3, K0-K3, W0/W1. Copy them from `reports/` on Drive.
 
 `tests/test_real_model.py` and an offline run through the backend's own predictor: 9 of 10 true
 alarms escalated, 12 of 15 false alarms suppressed (the one missed true alarm has p=0.476 against
-a threshold of 0.515). Per-alarm backend latency is ~63 ms (preprocess ~37 ms, inference ~26 ms)
-on the target laptop. 25 alarms are too few to estimate performance; use the test table above.
+a threshold of 0.515). One verdict observed in the backend log took 63 ms (preprocess ~37 ms, inference ~26 ms) on the
+target laptop; an offline loop over the 25 alarms averaged ~240 ms per alarm (max 335 ms), which
+includes cold-start effects and was not reconciled with the log. Treat latency as "well under a
+second", not a precise figure. 25 alarms are too few to estimate performance; use the test table above.

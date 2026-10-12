@@ -11,8 +11,9 @@ Data: [VTaC on PhysioNet](https://physionet.org/) — 5,037 labeled VT alarm eve
 
 ## Status
 
-Checkpoint 1, stage 0: repo skeleton and docs only. No application code yet.
-See [docs/roadmap.md](docs/roadmap.md).
+Checkpoint 1: pipeline, trained model, backend and dashboard are built and run end to end on the
+replay sample. See [docs/roadmap.md](docs/roadmap.md), [docs/demo.md](docs/demo.md) and
+[docs/checkpoint1-signoff.md](docs/checkpoint1-signoff.md).
 
 ## Layout
 
@@ -31,6 +32,7 @@ See [docs/roadmap.md](docs/roadmap.md).
 
 [architecture](docs/architecture.md) · [data](docs/data.md) · [modeling](docs/modeling.md) ·
 [api](docs/api.md) · [roadmap](docs/roadmap.md) · [decisions](docs/decisions.md) ·
-[colab-workflow](docs/colab-workflow.md)
+[colab-workflow](docs/colab-workflow.md) · [demo](docs/demo.md) ·
+[sign-off](docs/checkpoint1-signoff.md)
 
 See [CLAUDE.md](CLAUDE.md) for contributor and agent conventions.
