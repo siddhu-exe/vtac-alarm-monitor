@@ -55,7 +55,7 @@ Fill with validation numbers during development; the final row set is re-run on 
 | C1 | ResNet1D | ECG-only | focal loss | – | | | | | | | |
 | C2 | ResNet1D | ECG + pulsatile | weighted sampler | – | | | | | | | |
 | C3 | ResNet1D | ECG + pulsatile | focal loss | – | | | | | | | |
-| C4 | best of C2/C3 | ECG + pulsatile | best | channel dropout | | | | | | | |
+| C4 | best of C2/C3 (focal) | ECG + pulsatile | focal loss | channel dropout 0.15 | 0.886 | 0.945 | 0.950 | 0.650 | 0.795 | 0.515 | val, constrained thr; `model_config.json`, seed 42 |
 
 **Channel ablation** (same model, mask changes; PPG and ABP are separate slots):
 
@@ -98,3 +98,28 @@ under a **hard safety constraint: validation TPR >= 0.95** (decided 2026-10-09, 
 
 Fixed seeds; log `vtac` git ref, data version, split seed, hyperparameters, and metrics to a JSON
 saved beside the model on Drive. (Full experiment tracking is checkpoint 2.)
+
+## Results so far (final model, offset +2.0 s)
+
+Model `resnet1d-C4_all_dropout-off2.0`, from `models/model_config.json`. Thresholds were tuned on
+validation only; test was applied once.
+
+| Split | Threshold | TP | FN | FP | TN | TPR | TNR | PPV | Challenge Score | PR-AUC | ROC-AUC |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| Val, constrained (TPR >= 0.95) | 0.515 | 134 | 7 | 72 | 282 | 0.950 | 0.797 | 0.650 | 0.795 | 0.886 | 0.945 |
+| Val, unconstrained | 0.561 | 130 | 11 | 46 | 308 | 0.922 | 0.870 | 0.739 | 0.813 | 0.886 | 0.945 |
+| **Test, constrained (used by backend)** | 0.515 | 132 | 5 | 67 | 278 | 0.964 | 0.806 | 0.663 | 0.817 (95% CI 0.767-0.867) | 0.875 | 0.946 |
+| Test, unconstrained | 0.561 | 125 | 12 | 51 | 294 | 0.912 | 0.852 | 0.710 | 0.791 (95% CI 0.710-0.867) | 0.875 | 0.946 |
+
+Reading: at the constrained threshold, about 81% of false alarms are suppressed while 96% of true
+alarms are kept. The unconstrained threshold suppresses more false alarms but misses 7 more true
+ones, so it is not used. Test TPR is an estimate, not a guarantee (the CI is wide).
+
+Not yet filled: B0/B1, C0-C3, K0-K3, W0/W1. Copy them from `reports/` on Drive.
+
+## Replay-sample check (laptop, 25 test alarms)
+
+`tests/test_real_model.py` and an offline run through the backend's own predictor: 9 of 10 true
+alarms escalated, 12 of 15 false alarms suppressed (the one missed true alarm has p=0.476 against
+a threshold of 0.515). Per-alarm backend latency is ~63 ms (preprocess ~37 ms, inference ~26 ms)
+on the target laptop. 25 alarms are too few to estimate performance; use the test table above.
