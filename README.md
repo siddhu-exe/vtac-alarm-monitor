@@ -1,5 +1,10 @@
 # ICU VT False-Alarm Reduction
 
+![Mode: simulated replay](https://img.shields.io/badge/mode-simulated%20replay-blue)
+![Clinical use: no](https://img.shields.io/badge/clinical%20use-no-red)
+![Python 3.11](https://img.shields.io/badge/python-3.11-blue)
+![Frontend: React + TypeScript](https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-informational)
+
 **AI-Based Continuous Patient Monitoring Dashboard.** It classifies ventricular tachycardia (VT)
 alarms from ICU bedside monitors as true or false, to cut alarm fatigue while rarely missing a true
 alarm.
@@ -7,6 +12,10 @@ alarm.
 > Everything shown in the dashboard is **simulated real-time (replayed recordings)** from the open
 > VTaC dataset. This project does not connect to live bedside monitors, has no clinical validation
 > and is **not for clinical use**.
+
+**Contents:** [What it is](#what-it-is) · [Results](#results) · [Run the demo](#run-the-demo) ·
+[Limitations](#limitations) · [Layout](#layout) · [Docs](#docs) · [Data and credits](#data-and-credits) ·
+[License](#license)
 
 ## What it is
 
@@ -21,6 +30,13 @@ alarm.
   alarm counts as 5 false alarms.
 - **Serving:** FastAPI + onnxruntime on CPU replays recordings over a WebSocket; a React dashboard
   draws the waveforms and the verdicts.
+
+**What the model sees.** Six 10 s model-input windows after filtering and scaling (the first three
+true and the first three false events in the processed data; the four channels are shifted up and
+down only so they do not overlap).
+Source: `reports/window_samples.png`, written by `notebooks/01_data_prep.ipynb`.
+
+![Six preprocessed 10 s windows: three true alarms and three false alarms, channels ECG_1, ECG_2, PPG, ABP](reports/window_samples.png)
 
 ## Results
 
@@ -110,6 +126,21 @@ not changed.
 | `models/` | ONNX model + config (gitignored) |
 | `tests/` | pytest |
 | `docs/` | Technical docs, and `docs/explain/` plain-language guides for presenting |
+
+## Data and credits
+
+- **Dataset:** VTaC (Ventricular Tachycardia Alarms from ICU), v1.0, on
+  [PhysioNet](https://physionet.org/content/vtac/1.0/), open access. Follow PhysioNet's citation and
+  licence terms when you reuse it. No recordings are stored in this repo; the 25-alarm replay sample
+  and the model files are gitignored.
+- **Benchmark code:** the filter settings follow the VTaC benchmark repository
+  ([ML-Health/VTaC](https://github.com/ML-Health/VTaC)).
+- **Metric:** the Challenge Score weighting is from the PhysioNet/CinC 2015 false-alarm challenge.
+
+## License
+
+No licence file has been added to this repo yet. Until the owner chooses one, others have no
+stated permission to reuse the code.
 
 ## Docs
 
