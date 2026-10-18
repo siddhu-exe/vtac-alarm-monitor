@@ -1,0 +1,828 @@
+{
+  "what": "backend InferenceService (preprocess_slots + OnnxPredictor) on the replay sample",
+  "measured_at_unix": 1792318812.2095857,
+  "model_version": "resnet1d-C4_all_dropout-off2.0",
+  "threshold": 0.5148199200630188,
+  "window_end_index": 75500,
+  "host": {
+    "cpu": "Intel(R) Core(TM) i3 CPU       M 380  @ 2.53GHz",
+    "platform": "Linux-7.0.0-31-generic-x86_64-with-glibc2.39",
+    "python": "3.11.17"
+  },
+  "onnxruntime_intra_op_threads": 2,
+  "sample": {
+    "n_alarms": 25,
+    "n_true": 10,
+    "n_false": 15,
+    "true_escalated": 9,
+    "false_suppressed": 12
+  },
+  "latency": {
+    "method": "first_pass = each of the 25 alarms once, right after model load (includes cold-start effects); warm = 10 further passes over the same alarms (250 calls). Per-call time = preprocess + inference.",
+    "first_pass_total": {
+      "count": 25,
+      "mean_ms": 67.50844396001412,
+      "median_ms": 66.174404000094,
+      "p95_ms": 91.4417885998773,
+      "max_ms": 97.8795959999843
+    },
+    "warm_total": {
+      "count": 250,
+      "mean_ms": 48.03028935599559,
+      "median_ms": 40.25253149995933,
+      "p95_ms": 80.45708004998458,
+      "max_ms": 153.76073100014764
+    },
+    "warm_preprocess": {
+      "count": 250,
+      "mean_ms": 21.68145910799649,
+      "median_ms": 17.90082249999614,
+      "p95_ms": 38.39690719998996,
+      "max_ms": 65.34875300008025
+    },
+    "warm_infer": {
+      "count": 250,
+      "mean_ms": 26.348830247999103,
+      "median_ms": 20.75452500002939,
+      "p95_ms": 45.70502580003221,
+      "max_ms": 134.66097200011973
+    }
+  },
+  "alarms": [
+    {
+      "alarm_id": "105bad_0007",
+      "patient_id": "105bad",
+      "ground_truth": "true",
+      "p_true": 0.6498572600340583,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.1350373399710395,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 35.08145299997523,
+      "infer_ms": 58.842390999870986,
+      "total_ms": 93.92384399984621
+    },
+    {
+      "alarm_id": "105bad_0333",
+      "patient_id": "105bad",
+      "ground_truth": "true",
+      "p_true": 0.6751379785937007,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.16031805853068193,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 27.13065800003278,
+      "infer_ms": 35.71259600016674,
+      "total_ms": 62.84325400019952
+    },
+    {
+      "alarm_id": "108c4d_4582",
+      "patient_id": "108c4d",
+      "ground_truth": "false",
+      "p_true": 0.5862017617990439,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": false,
+      "margin_to_threshold": 0.07138184173602513,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "degraded"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 32.73989800004529,
+      "infer_ms": 39.31394200003524,
+      "total_ms": 72.05384000008053
+    },
+    {
+      "alarm_id": "25e32c_0196",
+      "patient_id": "25e32c",
+      "ground_truth": "false",
+      "p_true": 0.3585905342275247,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.15622938583549412,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 35.368290999940655,
+      "infer_ms": 40.641828000161695,
+      "total_ms": 76.01011900010235
+    },
+    {
+      "alarm_id": "31593f_0034",
+      "patient_id": "31593f",
+      "ground_truth": "true",
+      "p_true": 0.7420399406176184,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.22722002055459956,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "degraded"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 30.985483999984353,
+      "infer_ms": 37.81522999997833,
+      "total_ms": 68.80071399996268
+    },
+    {
+      "alarm_id": "3ba184_0047",
+      "patient_id": "3ba184",
+      "ground_truth": "false",
+      "p_true": 0.6225473211051313,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": false,
+      "margin_to_threshold": 0.10772740104211254,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 28.889648999893325,
+      "infer_ms": 32.55893200002902,
+      "total_ms": 61.44858099992234
+    },
+    {
+      "alarm_id": "5ae421_1368",
+      "patient_id": "5ae421",
+      "ground_truth": "false",
+      "p_true": 0.37945790365663024,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.13536201640638856,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "I",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 25.685370000019248,
+      "infer_ms": 55.82819699998254,
+      "total_ms": 81.51356700000179
+    },
+    {
+      "alarm_id": "654c76_0034",
+      "patient_id": "654c76",
+      "ground_truth": "false",
+      "p_true": 0.2112315306803484,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.3035883893826704,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "degraded"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 33.28366599998844,
+      "infer_ms": 33.80311200021424,
+      "total_ms": 67.08677800020268
+    },
+    {
+      "alarm_id": "67b8ac_0342",
+      "patient_id": "67b8ac",
+      "ground_truth": "false",
+      "p_true": 0.3537475318033334,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.1610723882596854,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "good"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 33.71218899997075,
+      "infer_ms": 30.901381999910882,
+      "total_ms": 64.61357099988163
+    },
+    {
+      "alarm_id": "6b6a0d_0080",
+      "patient_id": "6b6a0d",
+      "ground_truth": "true",
+      "p_true": 0.6028881540418268,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.08806823397880803,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 25.543775999949503,
+      "infer_ms": 34.57895000019562,
+      "total_ms": 60.12272600014512
+    },
+    {
+      "alarm_id": "6dcd07_0023",
+      "patient_id": "6dcd07",
+      "ground_truth": "false",
+      "p_true": 0.2470210524842545,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.2677988675787643,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 25.402233000022534,
+      "infer_ms": 32.722035000006144,
+      "total_ms": 58.12426800002868
+    },
+    {
+      "alarm_id": "6e465b_0022",
+      "patient_id": "6e465b",
+      "ground_truth": "false",
+      "p_true": 0.09773188079833132,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.41708803926468746,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 21.984449000001405,
+      "infer_ms": 33.25252800004819,
+      "total_ms": 55.23697700004959
+    },
+    {
+      "alarm_id": "79c471_0246",
+      "patient_id": "79c471",
+      "ground_truth": "false",
+      "p_true": 0.5408499978149724,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": false,
+      "margin_to_threshold": 0.02603007775195365,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 27.870797000105085,
+      "infer_ms": 38.4878889999527,
+      "total_ms": 66.35868600005779
+    },
+    {
+      "alarm_id": "8af63e_0504",
+      "patient_id": "8af63e",
+      "ground_truth": "false",
+      "p_true": 0.15579475589289904,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.35902516417011976,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "degraded"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 28.634680999857665,
+      "infer_ms": 39.19414999995752,
+      "total_ms": 67.82883099981518
+    },
+    {
+      "alarm_id": "8cedaf_0139",
+      "patient_id": "8cedaf",
+      "ground_truth": "false",
+      "p_true": 0.25674239874316007,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.2580775213198587,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 22.34980799994446,
+      "infer_ms": 34.10344400003851,
+      "total_ms": 56.45325199998297
+    },
+    {
+      "alarm_id": "8f5f43_0332",
+      "patient_id": "8f5f43",
+      "ground_truth": "true",
+      "p_true": 0.8572148081854645,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.3423948881224457,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "degraded"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 32.52647499994055,
+      "infer_ms": 35.790737000070294,
+      "total_ms": 68.31721200001084
+    },
+    {
+      "alarm_id": "9b5117_2510",
+      "patient_id": "9b5117",
+      "ground_truth": "true",
+      "p_true": 0.6809872781776222,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.16616735811460337,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "good"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 36.40533699990556,
+      "infer_ms": 61.474259000078746,
+      "total_ms": 97.8795959999843
+    },
+    {
+      "alarm_id": "a06fbf_0500",
+      "patient_id": "a06fbf",
+      "ground_truth": "true",
+      "p_true": 0.47603503973765776,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": false,
+      "margin_to_threshold": -0.03878488032536104,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "good"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 41.12578800004485,
+      "infer_ms": 38.61715799985177,
+      "total_ms": 79.74294599989662
+    },
+    {
+      "alarm_id": "a06fbf_0533",
+      "patient_id": "a06fbf",
+      "ground_truth": "false",
+      "p_true": 0.21293173505006033,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.30188818501295844,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "good"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 31.61712499991154,
+      "infer_ms": 45.9985710001547,
+      "total_ms": 77.61569600006624
+    },
+    {
+      "alarm_id": "b87209_0103",
+      "patient_id": "b87209",
+      "ground_truth": "true",
+      "p_true": 0.5965782134451577,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.08175829338213891,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 23.021444999812957,
+      "infer_ms": 32.60713800000303,
+      "total_ms": 55.62858299981599
+    },
+    {
+      "alarm_id": "bb7f6d_0965",
+      "patient_id": "bb7f6d",
+      "ground_truth": "false",
+      "p_true": 0.3331302179959474,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.1816897020670714,
+      "mask": [
+        1,
+        0,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "bad",
+        "PPG": "degraded",
+        "ABP": "good"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 22.000677000050928,
+      "infer_ms": 33.130712999991374,
+      "total_ms": 55.1313900000423
+    },
+    {
+      "alarm_id": "cac267_0872",
+      "patient_id": "cac267",
+      "ground_truth": "false",
+      "p_true": 0.21665018319017865,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.29816973687284015,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "degraded"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 28.691512000023067,
+      "infer_ms": 30.839920000062193,
+      "total_ms": 59.53143200008526
+    },
+    {
+      "alarm_id": "e07c36_0066",
+      "patient_id": "e07c36",
+      "ground_truth": "true",
+      "p_true": 0.7272857998604418,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.21246587979742304,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 32.532685999967725,
+      "infer_ms": 33.641718000126275,
+      "total_ms": 66.174404000094
+    },
+    {
+      "alarm_id": "e07c36_2610",
+      "patient_id": "e07c36",
+      "ground_truth": "true",
+      "p_true": 0.6679440112947321,
+      "verdict": "TRUE_ALARM",
+      "action": "escalated",
+      "correct": true,
+      "margin_to_threshold": 0.15312409123171333,
+      "mask": [
+        1,
+        1,
+        1,
+        0
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "absent"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": null
+      },
+      "preprocess_ms": 24.735584999916682,
+      "infer_ms": 34.34990100004143,
+      "total_ms": 59.08548599995811
+    },
+    {
+      "alarm_id": "e100f6_0051",
+      "patient_id": "e100f6",
+      "ground_truth": "false",
+      "p_true": 0.3839706148236877,
+      "verdict": "FALSE_ALARM",
+      "action": "suppressed",
+      "correct": true,
+      "margin_to_threshold": -0.13084930523933108,
+      "mask": [
+        1,
+        1,
+        1,
+        1
+      ],
+      "quality": {
+        "ECG_1": "good",
+        "ECG_2": "good",
+        "PPG": "degraded",
+        "ABP": "degraded"
+      },
+      "sources": {
+        "ECG_1": "II",
+        "ECG_2": "V",
+        "PPG": "PLETH",
+        "ABP": "ABP"
+      },
+      "preprocess_ms": 26.813321000190626,
+      "infer_ms": 29.372024999929636,
+      "total_ms": 56.18534600012026
+    }
+  ]
+}

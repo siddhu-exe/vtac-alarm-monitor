@@ -1,0 +1,583 @@
+{
+ "window_end_s": 302.0,
+ "alarm_onset_s": 300.0,
+ "numerics_window_s": 8.0,
+ "alarms": {
+  "8af63e_0504": {
+   "ground_truth": "false",
+   "sources": {
+    "ECG_1": "II",
+    "ECG_2": "V",
+    "PPG": "PLETH",
+    "ABP": "ABP"
+   },
+   "numerics_by_second": {
+    "286": {
+     "hr_bpm": 153.8,
+     "pr_bpm": 114.5,
+     "abp_sys": 152.5,
+     "abp_dia": 53.4,
+     "abp_map": 86.4
+    },
+    "287": {
+     "hr_bpm": 133.9,
+     "pr_bpm": 114.5,
+     "abp_sys": 152.2,
+     "abp_dia": 54.5,
+     "abp_map": 87.1
+    },
+    "288": {
+     "hr_bpm": 133.9,
+     "pr_bpm": 114.5,
+     "abp_sys": 151.0,
+     "abp_dia": 53.5,
+     "abp_map": 86.0
+    },
+    "289": {
+     "hr_bpm": null,
+     "pr_bpm": 114.5,
+     "abp_sys": 151.6,
+     "abp_dia": 51.1,
+     "abp_map": 84.6
+    },
+    "290": {
+     "hr_bpm": null,
+     "pr_bpm": 114.5,
+     "abp_sys": 152.5,
+     "abp_dia": 52.7,
+     "abp_map": 86.0
+    },
+    "291": {
+     "hr_bpm": null,
+     "pr_bpm": 114.9,
+     "abp_sys": 153.4,
+     "abp_dia": 54.5,
+     "abp_map": 87.5
+    },
+    "292": {
+     "hr_bpm": null,
+     "pr_bpm": 115.4,
+     "abp_sys": 153.3,
+     "abp_dia": 55.4,
+     "abp_map": 88.1
+    },
+    "293": {
+     "hr_bpm": null,
+     "pr_bpm": 114.5,
+     "abp_sys": 152.5,
+     "abp_dia": 55.7,
+     "abp_map": 87.9
+    },
+    "294": {
+     "hr_bpm": null,
+     "pr_bpm": null,
+     "abp_sys": 152.2,
+     "abp_dia": 55.1,
+     "abp_map": 87.5
+    },
+    "295": {
+     "hr_bpm": null,
+     "pr_bpm": null,
+     "abp_sys": 152.1,
+     "abp_dia": 51.4,
+     "abp_map": 84.9
+    },
+    "296": {
+     "hr_bpm": null,
+     "pr_bpm": null,
+     "abp_sys": 153.4,
+     "abp_dia": 51.9,
+     "abp_map": 85.7
+    },
+    "297": {
+     "hr_bpm": 103.4,
+     "pr_bpm": 113.2,
+     "abp_sys": 153.3,
+     "abp_dia": 54.0,
+     "abp_map": 87.1
+    },
+    "298": {
+     "hr_bpm": 103.4,
+     "pr_bpm": 113.2,
+     "abp_sys": 152.2,
+     "abp_dia": 54.0,
+     "abp_map": 86.8
+    },
+    "299": {
+     "hr_bpm": 94.9,
+     "pr_bpm": 112.8,
+     "abp_sys": 152.1,
+     "abp_dia": 54.0,
+     "abp_map": 86.7
+    },
+    "300": {
+     "hr_bpm": 94.9,
+     "pr_bpm": 112.8,
+     "abp_sys": 150.2,
+     "abp_dia": 53.1,
+     "abp_map": 85.4
+    },
+    "301": {
+     "hr_bpm": 103.4,
+     "pr_bpm": 113.6,
+     "abp_sys": 149.6,
+     "abp_dia": 52.1,
+     "abp_map": 84.6
+    },
+    "302": {
+     "hr_bpm": 103.4,
+     "pr_bpm": 112.8,
+     "abp_sys": 149.9,
+     "abp_dia": 51.2,
+     "abp_map": 84.1
+    },
+    "303": {
+     "hr_bpm": 87.7,
+     "pr_bpm": 113.2,
+     "abp_sys": 151.8,
+     "abp_dia": 51.1,
+     "abp_map": 84.6
+    },
+    "304": {
+     "hr_bpm": 69.6,
+     "pr_bpm": 113.6,
+     "abp_sys": 151.8,
+     "abp_dia": 51.1,
+     "abp_map": 84.6
+    }
+   }
+  },
+  "8f5f43_0332": {
+   "ground_truth": "true",
+   "sources": {
+    "ECG_1": "II",
+    "ECG_2": "V",
+    "PPG": "PLETH",
+    "ABP": "ABP"
+   },
+   "numerics_by_second": {
+    "286": {
+     "hr_bpm": 88.8,
+     "pr_bpm": 88.2,
+     "abp_sys": 77.4,
+     "abp_dia": 68.6,
+     "abp_map": 71.5
+    },
+    "287": {
+     "hr_bpm": 88.8,
+     "pr_bpm": 88.0,
+     "abp_sys": 76.9,
+     "abp_dia": 68.4,
+     "abp_map": 71.2
+    },
+    "288": {
+     "hr_bpm": 88.8,
+     "pr_bpm": 87.7,
+     "abp_sys": 76.0,
+     "abp_dia": 68.1,
+     "abp_map": 70.7
+    },
+    "289": {
+     "hr_bpm": 88.8,
+     "pr_bpm": 87.5,
+     "abp_sys": 76.0,
+     "abp_dia": 68.3,
+     "abp_map": 70.8
+    },
+    "290": {
+     "hr_bpm": 88.2,
+     "pr_bpm": 87.7,
+     "abp_sys": 76.0,
+     "abp_dia": 68.1,
+     "abp_map": 70.7
+    },
+    "291": {
+     "hr_bpm": 88.2,
+     "pr_bpm": 88.8,
+     "abp_sys": 75.9,
+     "abp_dia": 68.4,
+     "abp_map": 70.9
+    },
+    "292": {
+     "hr_bpm": 88.8,
+     "pr_bpm": 88.8,
+     "abp_sys": 76.0,
+     "abp_dia": 68.4,
+     "abp_map": 70.9
+    },
+    "293": {
+     "hr_bpm": 101.0,
+     "pr_bpm": 88.2,
+     "abp_sys": 75.6,
+     "abp_dia": 68.1,
+     "abp_map": 70.6
+    },
+    "294": {
+     "hr_bpm": 250.0,
+     "pr_bpm": 88.2,
+     "abp_sys": 75.5,
+     "abp_dia": 68.4,
+     "abp_map": 70.8
+    },
+    "295": {
+     "hr_bpm": 241.9,
+     "pr_bpm": 88.2,
+     "abp_sys": 74.8,
+     "abp_dia": 68.1,
+     "abp_map": 70.3
+    },
+    "296": {
+     "hr_bpm": 225.6,
+     "pr_bpm": 89.8,
+     "abp_sys": 74.6,
+     "abp_dia": 67.0,
+     "abp_map": 69.6
+    },
+    "297": {
+     "hr_bpm": 217.4,
+     "pr_bpm": null,
+     "abp_sys": 73.5,
+     "abp_dia": 63.5,
+     "abp_map": 66.8
+    },
+    "298": {
+     "hr_bpm": 170.5,
+     "pr_bpm": null,
+     "abp_sys": 67.8,
+     "abp_dia": 60.1,
+     "abp_map": 62.7
+    },
+    "299": {
+     "hr_bpm": 156.2,
+     "pr_bpm": null,
+     "abp_sys": 66.7,
+     "abp_dia": 58.6,
+     "abp_map": 61.3
+    },
+    "300": {
+     "hr_bpm": 151.5,
+     "pr_bpm": null,
+     "abp_sys": 65.8,
+     "abp_dia": 58.3,
+     "abp_map": 60.8
+    },
+    "301": {
+     "hr_bpm": 168.5,
+     "pr_bpm": null,
+     "abp_sys": 65.8,
+     "abp_dia": 58.5,
+     "abp_map": 60.9
+    },
+    "302": {
+     "hr_bpm": 162.2,
+     "pr_bpm": null,
+     "abp_sys": 65.3,
+     "abp_dia": 57.9,
+     "abp_map": 60.3
+    },
+    "303": {
+     "hr_bpm": 156.2,
+     "pr_bpm": null,
+     "abp_sys": 65.4,
+     "abp_dia": 55.5,
+     "abp_map": 58.8
+    },
+    "304": {
+     "hr_bpm": 153.8,
+     "pr_bpm": null,
+     "abp_sys": 65.1,
+     "abp_dia": 55.4,
+     "abp_map": 58.6
+    }
+   }
+  },
+  "108c4d_4582": {
+   "ground_truth": "false",
+   "sources": {
+    "ECG_1": "II",
+    "ECG_2": "V",
+    "PPG": "PLETH",
+    "ABP": "ABP"
+   },
+   "numerics_by_second": {
+    "286": {
+     "hr_bpm": 136.4,
+     "pr_bpm": null,
+     "abp_sys": 93.9,
+     "abp_dia": 57.4,
+     "abp_map": 69.6
+    },
+    "287": {
+     "hr_bpm": 135.7,
+     "pr_bpm": null,
+     "abp_sys": 93.8,
+     "abp_dia": 56.7,
+     "abp_map": 69.1
+    },
+    "288": {
+     "hr_bpm": 154.6,
+     "pr_bpm": null,
+     "abp_sys": 92.5,
+     "abp_dia": 56.3,
+     "abp_map": 68.4
+    },
+    "289": {
+     "hr_bpm": 214.3,
+     "pr_bpm": null,
+     "abp_sys": 93.6,
+     "abp_dia": 56.2,
+     "abp_map": 68.7
+    },
+    "290": {
+     "hr_bpm": 131.6,
+     "pr_bpm": null,
+     "abp_sys": 90.8,
+     "abp_dia": 55.7,
+     "abp_map": 67.4
+    },
+    "291": {
+     "hr_bpm": 133.3,
+     "pr_bpm": null,
+     "abp_sys": 93.6,
+     "abp_dia": 55.7,
+     "abp_map": 68.3
+    },
+    "292": {
+     "hr_bpm": 129.3,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "293": {
+     "hr_bpm": 192.3,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "294": {
+     "hr_bpm": 185.2,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "295": {
+     "hr_bpm": 126.1,
+     "pr_bpm": null,
+     "abp_sys": 91.0,
+     "abp_dia": 54.8,
+     "abp_map": 66.9
+    },
+    "296": {
+     "hr_bpm": 123.0,
+     "pr_bpm": null,
+     "abp_sys": 87.5,
+     "abp_dia": 54.5,
+     "abp_map": 65.5
+    },
+    "297": {
+     "hr_bpm": 119.0,
+     "pr_bpm": null,
+     "abp_sys": 87.5,
+     "abp_dia": 54.5,
+     "abp_map": 65.5
+    },
+    "298": {
+     "hr_bpm": 119.0,
+     "pr_bpm": null,
+     "abp_sys": 85.7,
+     "abp_dia": 54.2,
+     "abp_map": 64.7
+    },
+    "299": {
+     "hr_bpm": 124.0,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "300": {
+     "hr_bpm": 129.3,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "301": {
+     "hr_bpm": 123.5,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "302": {
+     "hr_bpm": 123.5,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "303": {
+     "hr_bpm": 128.8,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "304": {
+     "hr_bpm": 132.7,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    }
+   }
+  },
+  "a06fbf_0500": {
+   "ground_truth": "true",
+   "sources": {
+    "ECG_1": "II",
+    "ECG_2": "V",
+    "PPG": "PLETH",
+    "ABP": "ABP"
+   },
+   "numerics_by_second": {
+    "286": {
+     "hr_bpm": 118.1,
+     "pr_bpm": 118.1,
+     "abp_sys": 125.6,
+     "abp_dia": 59.2,
+     "abp_map": 81.3
+    },
+    "287": {
+     "hr_bpm": 118.1,
+     "pr_bpm": 118.1,
+     "abp_sys": 126.5,
+     "abp_dia": 59.3,
+     "abp_map": 81.7
+    },
+    "288": {
+     "hr_bpm": 118.1,
+     "pr_bpm": 118.1,
+     "abp_sys": 126.5,
+     "abp_dia": 59.3,
+     "abp_map": 81.7
+    },
+    "289": {
+     "hr_bpm": 118.1,
+     "pr_bpm": 118.1,
+     "abp_sys": 126.5,
+     "abp_dia": 59.2,
+     "abp_map": 81.6
+    },
+    "290": {
+     "hr_bpm": 118.1,
+     "pr_bpm": 118.1,
+     "abp_sys": 126.2,
+     "abp_dia": 57.8,
+     "abp_map": 80.6
+    },
+    "291": {
+     "hr_bpm": 117.2,
+     "pr_bpm": 118.1,
+     "abp_sys": 125.2,
+     "abp_dia": 57.7,
+     "abp_map": 80.2
+    },
+    "292": {
+     "hr_bpm": 117.6,
+     "pr_bpm": 117.6,
+     "abp_sys": 125.2,
+     "abp_dia": 57.7,
+     "abp_map": 80.2
+    },
+    "293": {
+     "hr_bpm": 117.2,
+     "pr_bpm": 117.6,
+     "abp_sys": 124.4,
+     "abp_dia": 57.4,
+     "abp_map": 79.7
+    },
+    "294": {
+     "hr_bpm": 117.2,
+     "pr_bpm": 117.2,
+     "abp_sys": 124.1,
+     "abp_dia": 57.2,
+     "abp_map": 79.5
+    },
+    "295": {
+     "hr_bpm": 117.2,
+     "pr_bpm": 117.2,
+     "abp_sys": 123.8,
+     "abp_dia": 57.4,
+     "abp_map": 79.5
+    },
+    "296": {
+     "hr_bpm": 118.1,
+     "pr_bpm": 117.2,
+     "abp_sys": 123.8,
+     "abp_dia": 57.5,
+     "abp_map": 79.6
+    },
+    "297": {
+     "hr_bpm": 118.6,
+     "pr_bpm": 117.2,
+     "abp_sys": 123.2,
+     "abp_dia": 57.1,
+     "abp_map": 79.2
+    },
+    "298": {
+     "hr_bpm": 125.5,
+     "pr_bpm": 117.2,
+     "abp_sys": 122.3,
+     "abp_dia": 56.7,
+     "abp_map": 78.6
+    },
+    "299": {
+     "hr_bpm": 133.9,
+     "pr_bpm": 117.2,
+     "abp_sys": 109.2,
+     "abp_dia": 56.4,
+     "abp_map": 74.0
+    },
+    "300": {
+     "hr_bpm": 155.4,
+     "pr_bpm": null,
+     "abp_sys": 107.9,
+     "abp_dia": 56.2,
+     "abp_map": 73.4
+    },
+    "301": {
+     "hr_bpm": 133.9,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "302": {
+     "hr_bpm": 145.6,
+     "pr_bpm": null,
+     "abp_sys": null,
+     "abp_dia": null,
+     "abp_map": null
+    },
+    "303": {
+     "hr_bpm": 121.0,
+     "pr_bpm": null,
+     "abp_sys": 107.9,
+     "abp_dia": 56.1,
+     "abp_map": 73.4
+    },
+    "304": {
+     "hr_bpm": 119.0,
+     "pr_bpm": null,
+     "abp_sys": 112.1,
+     "abp_dia": 57.1,
+     "abp_map": 75.5
+    }
+   }
+  }
+ }
+}

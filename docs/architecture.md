@@ -7,48 +7,68 @@
 ```
         Google Colab                         Google Drive                    Laptop
  ┌───────────────────────────┐          ┌──────────────────┐        ┌─────────────────────────┐
- │ 01_data_prep              │  .npz    │ vtac/windows.npz │        │ backend (FastAPI+ORT)   │
- │ 02_baseline (XGBoost)     ├─────────►│ vtac/replay_*    ├───────►│  REST + WebSocket       │
- │ 03_cnn (PyTorch→ONNX)     │  .onnx   │ vtac/models/     │ manual │  MOCK or ONNX model     │
+ │ 01_data_prep              │  .npz    │ processed/       │        │ backend (FastAPI+ORT)   │
+ │ 02_baseline (XGBoost)     ├─────────►│ replay/          ├───────►│  REST + WebSocket       │
+ │ 03_cnn (PyTorch→ONNX)     │  .onnx   │ models/          │ manual │  ONNX (served) or MOCK  │
  │  └ imports src/vtac       │          │  model.onnx      │ copy   │  └ imports src/vtac     │
- └───────────────────────────┘          │  model_config.*  │        └───────────┬─────────────┘
-          ▲  pip install from GitHub    └──────────────────┘                    │ ws/http
-          └──────────── src/vtac ──────────────────────────────────────────────┤
+ └───────────────────────────┘          │  model_config.json│       └───────────┬─────────────┘
+          ▲  pip install from GitHub    │ reports/          │                   │ ws/http
+          └──────────── src/vtac ───────┴──────────────────┴───────────────────┤
                                                                        ┌────────▼────────────┐
                                                                        │ frontend (React+uPlot)│
                                                                        └──────────────────────┘
 ```
 
-1. **`src/vtac/`** — single source of truth for preprocessing: config, WFDB loading, bandpass
-   filtering, window extraction, channel selection + mask, feature extraction.
-2. **Colab notebooks** — heavy work; produce windows `.npz`, replay sample, ONNX model, metrics,
-   and the tuned threshold.
-3. **Backend** — loads ONNX with onnxruntime (CPU), replays recordings in simulated real time,
-   runs `vtac` preprocessing on the alarm window, returns verdicts, logs per-inference latency.
-4. **Frontend** — live ECG/PPG/ABP waveforms (uPlot), alarm feed, signal-quality badges, summary
-   panel, Grad-CAM placeholder.
+Final components (everything below exists and is exercised by the tests):
+
+1. **`src/vtac/`** — single source of truth for preprocessing and the decision config:
+   `config.py` (all constants, saved as `model_config.json`), `io.py` (WFDB/CSV loading, Colab
+   only), `channels.py` (slot mapping, quality, mask), `filters.py`, `windows.py`, `preprocess.py`
+   (the only raw -> model-input path), `features.py` (baseline features), `metrics.py` (PR-AUC,
+   ROC-AUC, Challenge Score, threshold tuning, patient-level bootstrap), `splits.py`, `dataset.py`
+   (npz I/O), `display.py` (dashboard HR / pulse / ABP readouts, never model inputs),
+   `synthetic.py` (test and fallback signals), `provenance.py`.
+2. **Colab notebooks** — `01_data_prep`, `02_baseline`, `03_cnn`: heavy work; produce the windows
+   `.npz`, the replay sample, the ONNX model, the metrics and the tuned threshold.
+3. **Backend** (`backend/app/`) — see "Backend" below.
+4. **Frontend** (`frontend/`) — live ECG/PPG/ABP waveforms (uPlot), alarm feed, verdict card,
+   signal-quality badges, session summary, model card, transport controls. Details below.
+5. **Tests** — `tests/` (pytest, synthetic signals, plus real-model smoke tests that skip when the
+   artifacts are absent) and `frontend/src/**/*.test.*` (Vitest).
+
+**Not built** (dropped from scope, see `docs/roadmap.md`): Grad-CAM or any attribution, drift
+monitoring, Docker, CI/CD, DVC, MLflow, model registry.
 
 ## Data flow (Colab -> Drive -> laptop)
 
-1. `01_data_prep` (Colab): download VTaC, verify schema, preprocess via `vtac`, write
-   `windows.npz` (windows, labels, split, ids) to Drive; export ~25 test alarms as a replay sample.
-2. `02_baseline` / `03_cnn` (Colab): read `windows.npz` from Drive, train, evaluate on the official
-   split, tune threshold on validation, export `model.onnx` + `model_config.json` to Drive.
-3. Laptop: download `model.onnx`, `model_config.json` into `models/` and the replay sample into
-   `data/sample/`. `pip install -e ".[backend,dev]"`, run backend + frontend.
+1. `01_data_prep` (Colab): download VTaC, check the labels and split (patient-level assertion), survey
+   every header, preprocess every event with `vtac` for offsets +2.0 s and 0.0 s, write
+   `processed/windows_off{2.0,0.0}.npz` and `windows_meta.json`, `reports/data_survey.json`, and
+   export 25 test alarms (10 true, 15 false) as raw slot-ordered segments to
+   `replay/replay_sample.npz` + `replay_index.json`. (Only the +2.0 s windows were used for
+   training.)
+2. `02_baseline` / `03_cnn` (Colab): read `processed/windows_off2.0.npz`, train on the train split,
+   early-stop and tune the threshold on validation, evaluate on test once, and write
+   `reports/baseline_metrics_off2.0.json`, `reports/cnn_val_ablation_off2.0.csv`,
+   `models/model.onnx` and `models/model_config.json`.
+3. Laptop: copy `model.onnx` and `model_config.json` into `models/`, the replay sample into
+   `data/sample/`, and the reports into `reports/`. `uv pip install -e ".[backend,dev]"`, run the
+   backend and the frontend. No raw data and no training on the laptop.
 
 ## Model I/O contract
 
-Values marked **TBD** are fixed after data verification (`docs/data.md`) and then written to
-`model_config.json`; the backend reads that file rather than hardcoding.
+The backend reads every value below from `models/model_config.json` (written by `03_cnn` as
+`VtacConfig.to_dict()`); nothing is hard-coded in the backend or the UI.
 
-**Segments (verified):** 90,000 samples at 250 Hz = 360 s (5 min before alarm onset + 1 min after);
-onset at sample 75,000 (t = 300 s). All channels are resampled to 250 Hz by the dataset authors.
+**Segments (verified for all 5,037 records, `reports/data_survey.json`):** 90,000 samples at 250 Hz
+= 360 s (5 min before alarm onset + 1 min after); onset at sample 75,000 (t = 300 s). All channels
+are at 250 Hz.
 
-**Window:** `window_s = 10` s ending at `alarm_onset_s + window_end_offset_s`. The offset is
-configurable (`vtac.config.VtacConfig`). Offset `0.0` reproduces the official benchmark window
-(samples 72,500:75,000); the default is `2.0` s (D18/D19). `T = 2500` samples. Windows never extend
-before the alarm plus the offset, so the verdict can be produced at (onset + offset) in a live replay.
+**Window:** `window_s = 10` s ending at `alarm_onset_s + window_end_offset_s` = 300 + 2.0 s, so the
+model sees t = 292 s to 302 s (8 s before to 2 s after onset), `T = 2500` samples. The offset is
+configurable (`vtac.config.VtacConfig`); offset `0.0` reproduces the official benchmark window
+(samples 72,500:75,000) but was not trained (D18/D19, `docs/decisions.md`). The verdict is produced
+at onset + offset in the replay, from samples up to that point only.
 
 **Input**
 
@@ -72,29 +92,39 @@ graph takes already-processed input.
 | `logit` | `(N, 1)` | raw score; `p_true = sigmoid(logit)` |
 
 Verdict = `TRUE_ALARM` if `p_true >= threshold` else `FALSE_ALARM`; `threshold` comes from
-`model_config.json` (the TPR-constrained operating point, see `docs/modeling.md`). Opset and dynamic
-batch axis set at export.
+`model_config.json` (the TPR-constrained operating point, see `docs/modeling.md`). The export uses
+ONNX opset 17 and a dynamic batch axis; the backend scores one window per call (batch of 1).
 
-`model_config.json` (written by `03_cnn`):
+`model_config.json` (written by `03_cnn`; abridged, the file also holds every filter, quality and
+display-readout constant of `VtacConfig`). Real values from `models/model_config.json`:
 
 ```json
 {
-  "model_version": "cnn-ecg-ppg-v1",
-  "fs": 250, "window_s": 10.0, "window_end_offset_s": 2.0,
+  "model_version": "resnet1d-C4_all_dropout-off2.0",
+  "fs": 250, "segment_samples": 90000, "alarm_onset_s": 300.0,
+  "window_s": 10.0, "window_end_offset_s": 2.0,
   "channel_slots": ["ECG_1", "ECG_2", "PPG", "ABP"],
   "input_shape": ["N", 4, 2500],
   "tpr_target": 0.95,
-  "threshold": 0.31,
-  "threshold_constrained": 0.31,
-  "threshold_unconstrained": 0.44,
-  "vtac_git_ref": "<commit>"
+  "threshold": 0.5148199200630188,
+  "threshold_constrained": 0.5148199200630188,
+  "threshold_unconstrained": 0.5606065988540649,
+  "vtac_git_ref": "6d30bd26a7e2e7dc149b069c0c111d701fc66325",
+  "extra": {"final_run": "C4_all_dropout", "imbalance": "focal", "dropout_aug": 0.15, "seed": 42,
+            "val": {"constrained": {}, "unconstrained": {}},
+            "test": {"constrained": {}, "unconstrained": {}}}
 }
 ```
 
+`extra.val` / `extra.test` hold the full confusion counts and metrics at both thresholds (tabulated in
+`docs/modeling.md`). `extra.architecture`, `extra.baseline` and `extra.metrics`, which `GET /model`
+reads for the Model card, are **not present** (see `docs/api.md`, "Known gap").
+
 ## WebSocket message schema
 
-Endpoint: `WS /ws/replay/{alarm_id}?speed=1.0&start_s=&end_s=` (params in `docs/api.md`). All messages are JSON with a `type` field and a
-`sim` flag making the simulated nature explicit. Times are seconds relative to segment start
+Endpoint: `WS /ws/replay/{alarm_id}?speed=1.0&start_s=&end_s=` (params in `docs/api.md`). All
+messages are JSON with a `type` field; the `session` message carries `sim: true` and the label
+"simulated real-time (replayed recordings)". Times are seconds relative to segment start
 (`t`); alarm onset is at `alarm_onset_s` = 300 s, the segment is 360 s long.
 
 Server -> client:
@@ -115,9 +145,10 @@ Server -> client:
  "numerics": {"hr_bpm": 84.0, "pr_bpm": 83.5, "abp_sys": 118.0, "abp_dia": 72.0, "abp_map": 87.3}}
 
 // 3. once, right after the chunk that reaches the window end (onset + window_end_offset_s);
-//    computed only from samples up to that point. `attribution` is OPTIONAL and omitted in
-//    checkpoint 1 (Grad-CAM, checkpoint 2): per_channel[slot] = one importance in [0,1] per equal
-//    time bin over [t - window_s, t], same bin count for every slot; channel_share sums to 1.
+//    computed only from samples up to that point. `attribution` is OPTIONAL and is never sent
+//    (no attribution method was built; the schema and the UI can render it if one is ever added):
+//    per_channel[slot] = one importance in [0,1] per equal time bin over [t - window_s, t], same
+//    bin count for every slot; channel_share sums to 1.
 {"type": "verdict", "alarm_id": "…", "t": 302.0, "p_true": 0.07, "verdict": "FALSE_ALARM",
  "action": "suppressed|escalated", "threshold": 0.31, "latency_ms": 11.2,
  "quality": {"ECG_1": "good"}, "mask": [1, 1, 1, 0],
@@ -205,9 +236,31 @@ origin) are validated at start-up. The dev server proxies `/api` and `/ws` to
 
 **Not in the UI (on purpose).** SpO₂ (no source in the data; the PLETH readout is pulse rate), a
 free-text "reason" for a verdict (nothing in the model produces one), and any claim that a nurse
-was paged. Grad-CAM is a placeholder until checkpoint 2; the contract already allows
-`verdict.attribution`, and the strips and the "Where the model looked" bars render it when it
-appears.
+was paged. The verdict card has a "Where the model looked" box; because no attribution is computed
+it shows a plain note instead of numbers. That note currently says attribution is "planned for
+checkpoint 2"; the plan was dropped (the wording lives in
+`frontend/src/features/verdict/AttributionBars.tsx` and was not changed).
+
+**Model card.** It shows architecture, runtime, version, test PR-AUC, Challenge score and baseline
+from `GET /model`. With the current `model_config.json` only runtime and version are filled; the
+other four show "not available" / "not evaluated yet" (`docs/api.md`, "Known gap").
+
+## Backend
+
+`backend/app/` (FastAPI, onnxruntime CPU, no torch):
+
+| Module | Job |
+|---|---|
+| `main.py` | App factory and all routes: `/health`, `/model`, `/patients`, `/alarms`, `/alarms/{id}`, `/predict`, `/metrics`, `WS /ws/replay/{id}` |
+| `settings.py` | Env-var config (`VTAC_MODEL_MODE`, `VTAC_MODEL_DIR`, `VTAC_SAMPLE_DIR`, `VTAC_N_SYNTHETIC`), chunk size 0.256 s |
+| `store.py` | Loads `model_config.json` (via `vtac.config`) and the replay sample; falls back to generated synthetic alarms when the sample is absent |
+| `model.py` | `OnnxPredictor` (checks input/output names and shapes against the config) and `MockPredictor` (hash-based dummy scores, labelled `mock`) |
+| `service.py` | `InferenceService`: raw slot window -> `vtac.preprocess_slots` -> predictor -> verdict, with timing and a log line |
+| `replay.py`, `control.py` | Simulated real-time stream: paced chunks, numerics once a second, one verdict at the window end; pause / resume / speed with drift-free pacing |
+| `latency.py` | Rolling latency tracker behind `/metrics` |
+| `schemas.py`, `ws_schemas.py` | Pydantic models for REST and WebSocket; `extra="forbid"` on every wire message |
+
+Mock mode exists so the UI could be built before the model, and for tests. The demo uses `onnx`.
 
 ## Train/serve skew control
 

@@ -1,0 +1,8 @@
+run,channels,imbalance,aug,val_pr_auc,val_roc_auc,thr_c,tpr_c,ppv_c,score_c,score_u
+C0_ecg_sampler,ECG_1+ECG_2,sampler,0.0,0.8492,0.9251,0.2591,0.9574,0.5294,0.711,0.725
+C1_ecg_focal,ECG_1+ECG_2,focal,0.0,0.8813,0.9416,0.1112,0.9716,0.517,0.7104,0.7808
+C2_all_sampler,ECG_1+ECG_2+PPG+ABP,sampler,0.0,0.8567,0.9465,0.0233,0.9504,0.6442,0.7916,0.7932
+C3_all_focal,ECG_1+ECG_2+PPG+ABP,focal,0.0,0.8779,0.9471,0.4564,0.9645,0.6355,0.8,0.8
+C4_all_dropout,ECG_1+ECG_2+PPG+ABP,focal,0.15,0.8863,0.9447,0.5148,0.9504,0.6505,0.7954,0.8126
+K1_ecg_ppg,ECG_1+ECG_2+PPG,focal,0.0,0.8524,0.9295,0.5021,0.9504,0.5982,0.761,0.761
+K2_ecg_abp,ECG_1+ECG_2+ABP,focal,0.0,0.8779,0.95,0.2738,0.9504,0.6381,0.7878,0.8011

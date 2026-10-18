@@ -1,108 +1,175 @@
 # Data: VTaC
 
-Source: VTaC (Ventricular Tachycardia Alarms from ICU), PhysioNet, open access.
+> Simulated real-time (replayed recordings). Not for clinical use.
 
-## Facts provided by the project owner (taken as given)
+Source: VTaC (Ventricular Tachycardia Alarms from ICU), PhysioNet v1.0, open access
+(`https://physionet.org/files/vtac/1.0/`, downloaded by `notebooks/01_data_prep.ipynb`).
 
-- 5,037 labeled VT alarm events; 1,441 true (28.61%) -> ~3.5 false per true alarm.
-- ~~Each record is a 10-minute WFDB segment (5 + 5 min).~~ **Corrected 2026-10-09:** a real `.hea` shows
-  90,000 samples at 250 Hz = **6 minutes** (5 min before alarm onset + 1 min after). See Findings.
-- At least 2 ECG leads + 1 or more pulsatile channels (PPG/PLETH and/or ABP); channels vary by record.
-- Labels in `event_labels.csv`; official split in `benchmark_data_split.csv`.
-- One patient can contribute up to 5 events.
+**How to read this file.** Every number carries its source in brackets. Sources are files in this
+repo: `reports/data_survey.json` (a header survey of all 5,037 records, written by `01_data_prep`),
+`models/model_config.json` (written by `03_cnn`), `reports/baseline_metrics_off2.0.json`
+(`02_baseline`) and `data/sample/replay_index.json`. Where the repo holds no number the text says
+**"not recorded in the repo"**: the Colab printouts were not saved with the notebooks (they have no
+stored outputs), and `windows_meta.json` lives only on Google Drive.
 
-## Not yet verified — do NOT hardcode
+## What is verified, and how
 
-Everything below is a hypothesis until `01_data_prep` confirms it against real files. Record the
-confirmed values in the **Findings** section, then mirror them into `vtac.config`.
-
-| Item | Evidence so far | Status |
+| Fact | Value | Source |
 |---|---|---|
-| Column names, `event_labels.csv` | `record,event,decision`; `decision` is `True`/`False` text | seen in file head; confirm full file |
-| Column names, `benchmark_data_split.csv` | `split,record,event` | seen in file head; confirm the set of `split` values (is there a `val`/`validation`?) |
-| Sampling rate | 250 Hz for all channels (dataset resampled) | verified in 1 header + dataset page + benchmark code; confirm across all records |
-| Samples per record | 90,000 (6 min) | verified in 1 header; confirm across all records |
-| Alarm onset position | sample 75,000 (t = 300 s) | inferred from dataset page ("5 min before") and benchmark window `72500:75000`; confirm with plots |
-| ECG channel names | seen: `II`, `aVR`, `V` | partial; collect the full set |
-| Pulsatile channel names | seen: `PLETH`; ABP name not yet seen | partial; collect the full set |
-| Units / gain / NaN encoding | PLETH unit `NU`, ECG `mV`; wfdb maps invalid ADC value to NaN | partial |
-| Patient identifier | `record` (folder per patient, up to 5 events) | assumed; verify the split is patient-level |
-| Validation split exists | unknown | unverified |
+| Records (alarm events) surveyed | 5,037 | `reports/data_survey.json` (`fs` and `sig_len` counts each sum to 5,037) |
+| Sampling rate | 250 Hz in **all** 5,037 records | `reports/data_survey.json` `fs` |
+| Samples per record | 90,000 in **all** 5,037 records (= 360 s = 6 min) | `reports/data_survey.json` `sig_len` |
+| Alarm onset | sample 75,000 (t = 300 s): 5 min before + 1 min after | PhysioNet VTaC page and the benchmark code (2026-10-09 check); `vtac.io.load_segment` enforces fs and length. The onset index itself is **not** confirmed from the survey; no per-record onset check is saved in the repo |
+| True alarms | 1,441 of 5,037 (28.61%) | Figure supplied with the project brief. **Not re-confirmed** in a saved report |
+| True rate in validation / test | 141 of 495 (28.48%); 137 of 482 (28.42%) | counts `tp+fn` and `tp+fn+fp+tn` in `models/model_config.json` `extra.val` / `extra.test`; percentages computed from them |
+| Label file | `event_labels.csv` columns `record,event,decision`; `decision` is `True`/`False` text, mapped to `y = 1` for True | `vtac.io.load_labels` (raises if a column is missing) |
+| Split file | `benchmark_data_split.csv` columns `split,record,event` | `vtac.io.load_split` (raises if a column is missing) |
 
-## Verification checklist (run in `01_data_prep`, Colab)
+Not recorded in the repo (they are printed by `01_data_prep` and saved to Drive only): the number of
+patients, the train split size, which `split` values the official file contains, whether the
+validation set was official or carved out (`val_carved` in Drive `windows_meta.json`), and the count
+of events that failed preprocessing (the notebook stops if more than 0.5% fail).
 
-- [ ] Download via `wfdb.dl_database` / PhysioNet; record dataset version and download date.
-- [ ] Print `event_labels.csv` and `benchmark_data_split.csv` columns, dtypes, head, row counts.
-- [ ] Confirm 5,037 events and 1,441 true (28.61%); report any discrepancy.
-- [ ] Join labels and split on the event/record id; assert 1:1, no missing, no duplicates.
-- [ ] Read every `.hea`: collect the set of channel names, units, sampling rates (per channel),
-      `sig_len`, `n_sig`. Tabulate frequency of each distinct channel set.
-- [ ] Confirm all records have >= 2 ECG leads and >= 1 pulsatile channel; list exceptions.
-- [ ] Find the patient id (from record name/header/metadata). **Verify the split is patient-level:**
-      no patient id appears in more than one of train/val/test. If patient id is not exposed,
-      document how it was inferred; if the split leaks patients, stop and raise it.
-- [ ] Class balance per split (true rate in train/val/test).
-- [ ] Inspect missing values: NaN, flat lines, saturation per channel; fraction per record.
-- [ ] Plot ~10 random true and ~10 false alarms to sanity check onset position and signal scale.
-- [ ] Confirm alarm onset sample index (expected near 5 min) and whether it is constant across records.
-- [ ] Write findings below and update `vtac.config`.
+## Channels (all 5,037 headers)
 
-## Findings
+Source: `reports/data_survey.json`. Names come from each `.hea`, never from a hard-coded list.
 
-Verified from outside the full dataset on 2026-10-09 (PhysioNet VTaC v1.0 page, one `.hea`, one
-`.csv` head each, and the benchmark repo `github.com/ML-Health/VTaC`). Not yet confirmed over all
-5,037 records; `01_data_prep` must re-check and overwrite this section with measured values.
+| Channel | Records containing it | Unit(s) |
+|---|---|---|
+| II | 4,996 | mV |
+| V | 4,775 | mV |
+| aVR | 3,147 | mV |
+| I | 1,860 | mV |
+| III | 1,840 | mV |
+| aVL / aVF | 169 / 163 | mV |
+| V1 / V2 / V3 / V4 / V5 / V6 | 134 / 105 / 71 / 71 / 81 / 71 | mV |
+| MCL | 43 | mV |
+| PLETH (photoplethysmogram, "PPG") | 4,681 | NU in 3,326 records, **mV in 1,355** |
+| ABP (arterial blood pressure) | 1,837 | mmHg |
 
-- **Record length / rate:** 4 signals, 250 Hz, 90,000 samples = 360 s. 5 min before + 1 min after
-  alarm onset. (The original brief said 10 min; that was wrong.)
-- **Example header (003c13_0115):** channels `II`, `aVR`, `V`, `PLETH`; 16-bit; units mV / NU.
-- **Benchmark window (official code):** `standardize.py` computes per-event statistics on samples
-  `72500:75000`, i.e. **10 s ending exactly at alarm onset** (75000 = 300 s x 250 Hz). The data
-  loader that builds the tensors was not in the repo, so the exact training window of the published
-  models is inferred, not confirmed. The README mentions `realtime` and `retrospective` experiment
-  folders; their exact definitions are not documented in the files we could read.
-- **Benchmark channel layout:** index 0,1 = ECG, 2 = PPG, 3 = ABP; a missing channel is all zeros
-  (the code tests `sample.sum() != 0` for availability). Our slots match this layout.
-- **Benchmark filters:** ECG 60 Hz notch (Q=30) + 1 Hz high-pass + 30 Hz low-pass (order 2);
-  PPG notch + 0.5-5 Hz band-pass (order 1); ABP notch + 16 Hz low-pass (order 2). Per-event,
-  per-channel z-score on the 2500-sample window. We replicate these in `vtac.filters` /
-  `vtac.preprocess` (zero-phase here; the benchmark's filter direction is unknown).
-- **Window decision:** default end offset +2 s past onset (D18), configurable; offset 0 equals the
-  benchmark window and is run as an ablation (D19).
+Two things to know:
 
-## Missing-channel rule
+- PLETH has two different units across records. This is harmless here because every window is
+  z-scored per channel, but the raw amplitudes are not comparable between records.
+- The config priority list names `MCL1` while the data says `MCL`. `MCL` is not in the priority list,
+  so it can only be picked by the fallback (first remaining non-pulsatile channel in header order).
 
-Channels vary by record, so the model sees a fixed set of slots with a mask
-(see `docs/architecture.md`).
+## Slots and the missing-channel rule
 
-1. Fixed slot order: `[ECG_1, ECG_2, PPG, ABP]` (proposed; finalize after verification).
-2. **ECG slots:** pick the first two available ECG leads by a fixed priority list defined in
-   `vtac.config` (e.g., lead II first). If only one ECG lead exists, `ECG_2` is missing.
-3. **PPG / ABP slots:** filled if a channel with a matching name exists, else missing.
-4. A slot is **missing** (`mask=0`, signal zero-filled) when the channel is absent from the header
-   or is unusable in the window: NaN fraction above `max_nan_frac` (0.5), flat line (>= 90% zero
-   sample-to-sample change), or zero std after filtering. Otherwise NaNs are linearly interpolated;
-   the channel is flagged `degraded` if NaN fraction > 5%, a gap > 1 s, or > 30% flat samples.
-   Noise level is deliberately NOT a masking criterion (noisy ECG is a false-alarm cue).
-5. Never impute a missing channel from another one. The mask is a model input, and models are
-   trained with random channel dropout so they handle absences.
-6. The per-channel `quality` badge in the UI derives from the same checks (`good`, `degraded`,
-   `bad`, `absent`), implemented once in `vtac`.
+The model sees four fixed slots `[ECG_1, ECG_2, PPG, ABP]` plus a 0/1 mask
+(`vtac.channels`, `vtac.config`).
+
+1. **ECG slots:** the first two available channels in the priority order
+   `II, V, aVR, I, III, aVL, aVF, V1, MCL1`; if fewer than two are found, any remaining
+   non-pulsatile channel fills in (header order). In the 25-alarm replay sample `ECG_1` is `II` in all
+   25 and `ECG_2` is `V` in 24 and `I` in 1 (`data/sample/replay_index.json`).
+2. **PPG slot:** a channel named `PLETH` or `PPG`. **ABP slot:** `ABP` or `ART`.
+3. A slot is **missing** (mask 0, signal all zeros) when there is no such channel, or when the channel
+   in the model window is unusable. Quality is judged on the **raw** window, before filtering:
+
+   | Level | Rule (values from `models/model_config.json`) |
+   |---|---|
+   | absent | no source channel, or the window is all NaN |
+   | bad | NaN fraction > 0.5, **or** flat fraction >= 0.9, **or** zero standard deviation |
+   | degraded | NaN fraction > 0.05, **or** a NaN gap > 1.0 s, **or** flat fraction > 0.3 |
+   | good | none of the above |
+
+   `absent` and `bad` are masked out. `degraded` is still used (and shown in the UI as "degraded").
+   "Flat fraction" = share of consecutive sample pairs with exactly zero change. After filtering, a
+   window whose standard deviation is below 1e-6 is also marked bad and masked.
+4. Noise level is deliberately **not** a masking criterion: noisy ECG is one of the cues that
+   separates false alarms from true ones.
+5. A missing channel is never imputed from another channel. Gaps inside a usable channel are filled by
+   linear interpolation before filtering (`vtac.preprocess.fill_nans`).
+
+### How often channels are missing (all 5,037 records)
+
+Source: `reports/data_survey.json` `missing_slot_patterns` (slots that have no source channel).
+
+| Missing slots | Records |
+|---|---|
+| none (all four present) | 1,761 |
+| ABP only | 2,877 |
+| PPG and ABP | 291 |
+| PPG only | 64 |
+| ECG_2 and ABP | 31 |
+| ECG_2 only | 12 |
+| ECG_2, PPG and ABP | 1 |
+
+Totals derived from that table: ABP absent in 3,200 records (63.5%), PPG absent in 356, ECG_2 absent
+in 44, and **no record is missing ECG_1**. 292 records have neither PPG nor ABP.
+
+On the test split, 434 windows have at least one usable pulsatile channel and 48 are ECG-only
+(`reports/baseline_metrics_off2.0.json` `by_channels`; this counts channels that survived the quality
+check, so it differs from the header-based table above).
+
+In the 25-alarm replay sample: ABP is absent in 13 alarms, ECG_2 is masked by the quality check in 1
+(`bb7f6d_0965`), and PPG is rated "degraded" in all 25 model windows (`reports/replay_sample_check.json`).
+That report does not store which "degraded" condition fired; earlier manual inspection of seven windows
+found a high flat-sample fraction (`docs/checkpoint1-signoff.md`).
 
 ## Split
 
-- Use `benchmark_data_split.csv` exactly as provided. Do not re-split randomly.
-- Verify it is patient-level (checklist above). One patient can have up to 5 events, so an
-  event-level split would leak.
-- If the official split has no validation set (decided 2026-10-09): carve it out of train **grouped
-  by patient and stratified by label** (`vtac.splits.add_validation_split`, `StratifiedGroupKFold`,
-  `val_frac=0.15`, `seed=42`). Record the seed and resulting counts here.
-- Threshold tuning and model selection use validation only; the test set is touched once, for final
-  reporting.
-- The replay sample (~25 alarms) is drawn from the **test** split with a fixed seed, over-sampling
-  true alarms enough to demo (about 8-10 true), and including records with a missing pulsatile channel.
+- The official split file is used exactly as provided; nothing is re-split randomly
+  (`vtac.io.load_split`).
+- **Patient-level.** `record` (the part of the event id before the underscore, e.g. `a06fbf` in
+  `a06fbf_0500`) identifies the patient; a patient can have up to 5 events. `01_data_prep` calls
+  `vtac.splits.check_patient_level` and **asserts** that no patient appears in more than one split,
+  before and after carving validation. The notebook ran to completion and produced the Drive
+  artifacts, so the assertions passed. The printed check output itself is not saved in the repo.
+- **Validation set.** If the official file has no `val` split, validation is carved out of train,
+  grouped by patient and stratified by label (`StratifiedGroupKFold`, `val_frac=0.15`, `seed=42`;
+  `vtac.splits.add_validation_split`). Test is never touched. Whether the carve-out ran is not
+  recorded in the repo.
+- **Sizes that are recorded:**
+
+  | Split | Alarms | True | False | Source |
+  |---|---|---|---|---|
+  | validation | 495 | 141 | 354 | `models/model_config.json` `extra.val` |
+  | test | 482 | 137 | 345 | `models/model_config.json` `extra.test` |
+  | train | not recorded in the repo | | | Drive `windows_meta.json` |
+
+  (5,037 - 495 - 482 = 4,060 would be the train size only if no event failed preprocessing. That is
+  an assumption, not a measurement.)
+- Threshold tuning and model selection use validation only. The test set was evaluated once, for the
+  final report. Confidence intervals are patient-level bootstrap (500 resamples, seed 42).
+- The replay sample is 25 alarms from the test split: 10 true and 15 false, drawn with a fixed seed
+  (`01_data_prep`), from 22 patients (`data/sample/replay_index.json`). It over-samples true alarms on
+  purpose; it is a demo set, not a performance estimate.
+
+## Preprocessing steps (the only implementation is `src/vtac/`)
+
+`vtac.preprocess.preprocess_slots`, in order, for one alarm. Notebooks and the backend both call it.
+
+1. **Window.** 10 s (2,500 samples) ending at onset + 2.0 s, i.e. t = 292 s to 302 s, which is
+   8 s before to 2 s after the alarm onset. A further 10 s of lead-in before the window is used only
+   so the filters settle, then trimmed. If the window does not fit the signal the code raises; it
+   never shifts the window silently (`vtac.windows`). The +2.0 s offset is a project choice (D18); the
+   official benchmark code normalises over the 10 s ending exactly at onset (offset 0.0). Offset 0.0
+   was **not run** as an ablation (see `docs/decisions.md`).
+2. **Map channels to slots**, then **assess quality** per slot on the raw window (rule above).
+3. **Fill NaN gaps** by linear interpolation (only for usable channels).
+4. **Filter**, zero-phase (`scipy.signal.sosfiltfilt`), following the benchmark's filter settings
+   (the benchmark's own filter direction is unknown):
+
+   | Slot | Filter (`models/model_config.json`) |
+   |---|---|
+   | ECG | 60 Hz notch (Q 30), 1 Hz high-pass, 30 Hz low-pass, 2nd order |
+   | PPG | 60 Hz notch (Q 30), 0.5-5 Hz band-pass, 1st order |
+   | ABP | 60 Hz notch (Q 30), 16 Hz low-pass, 2nd order |
+
+5. **Z-score** each channel with the window's own mean and standard deviation.
+6. **Mask.** Usable channels get mask 1; missing channels are zeros with mask 0.
+
+Output: `signals (4, 2500)` float32 and `mask (4,)` float32. The ONNX model takes
+`(N, 4, 2500)` and `(N, 4)` (`input_shape` in `models/model_config.json`).
+
+The dashboard's HR, pulse-rate and ABP readouts come from `vtac.display`. They are display heuristics
+computed on the trailing 8 s of raw signal, are **not** model inputs, and are not clinical
+measurements.
 
 ## Licensing / privacy
 
-VTaC is open access on PhysioNet; follow its citation and license terms. Do not commit raw
-waveforms (`.gitignore`). The ~25-alarm replay sample stays local.
+VTaC is open access on PhysioNet; follow its citation and licence terms. Raw waveforms, `.npz`
+files and models are never committed (`.gitignore`); the 25-alarm replay sample stays on the local
+machine.

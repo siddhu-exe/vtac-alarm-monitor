@@ -1,71 +1,84 @@
 # Roadmap
 
-> Simulated real-time (replayed recordings). Stage gate: no application code until the skeleton
-> and docs are reviewed.
+> Simulated real-time (replayed recordings). Not for clinical use.
 
-## Checkpoint 1 (current)
+Status on 2026-10-18: **scope is frozen** (decision D32). Everything below under "Built" exists in
+the repo and is covered by tests or by saved reports. Nothing new will be built; what remains is
+documentation and the open items listed at the end.
 
-### Stage 0 — skeleton + docs
-- [x] Repo structure, `.gitignore`, `pyproject.toml`, README
-- [x] `CLAUDE.md`
-- [x] docs: architecture, data, modeling, api, roadmap, decisions, colab-workflow
-- [x] **User review of skeleton/docs** (gate) — approved 2026-10-09
+## Built
 
-### Stage 1 — shared package `src/vtac/`
-- [x] `config.py` (dataclasses; fs, window, channel slots/priority, thresholds — filled from verified data)
-- [x] `io.py` WFDB loading (header-driven channel/fs discovery, no hardcoded names)
-- [x] `filters.py` bandpass (per modality)
-- [x] `windows.py` 10 s window extraction around alarm onset
-- [x] `channels.py` channel selection + missing-channel mask + quality flags
-- [x] `features.py` baseline features (neurokit2, imported lazily; Colab only) _(scipy features only; neurokit2 HRV is added in `02_baseline`)_
-- [x] `preprocess.py` single entry point raw record -> `(signals, mask)`
-- [x] `splits.py` patient-level check + grouped/stratified validation carve-out; `dataset.py` npz I/O; `synthetic.py` demo/test signals
-- [x] `metrics.py` PR-AUC, ROC-AUC, TPR, PPV, Challenge Score, threshold tuning
-- [x] pytest on synthetic signals — 36 passed, 0 skipped on 2026-10-09 (incl. wfdb I/O, split carving, ONNX loader)
+### Stage 0 - skeleton and docs
+- [x] Repo structure, `.gitignore`, `pyproject.toml`, `CLAUDE.md`
+- [x] Docs: architecture, data, modeling, api, roadmap, decisions, colab-workflow, demo, sign-off
+- [x] User review of the skeleton (gate), approved 2026-10-09
 
-### Stage 2 — Colab notebooks
-- [ ] Before `01_data_prep`: window ablation plan W0 (offset 0.0) vs W1 (default) is in `docs/modeling.md`
-- [x] `01_data_prep` **run on Colab 2026-10-12**: download, verify (fill `docs/data.md` Findings), preprocess both offsets, export ~25-alarm replay sample
-- [x] `02_baseline` **run on Colab**: neurokit2 + vtac features, XGBoost, B0/B1
-- [x] `03_cnn` **run on Colab** (final: C4 `resnet1d-C4_all_dropout-off2.0`, focal loss, dropout 0.15): ResNet1D, C0-C4 + K1/K2 ablations, ONNX export + parity check, thresholds -> `model_config.json`
-- [x] Run all three on Colab; artifacts copied to `models/` and `data/sample/`
-- [ ] Fill the remaining `docs/modeling.md` tables (B0/B1, C0-C3, K, W0/W1) from the Drive `reports/` files; only C4 is filled from `model_config.json`
+### Stage 1 - shared package `src/vtac/`
+- [x] `config.py` (all constants; saved as `model_config.json`)
+- [x] `io.py` WFDB/CSV loading (header-driven channel and rate discovery)
+- [x] `filters.py` band-pass/notch per modality (zero-phase)
+- [x] `windows.py` 10 s window around alarm onset (raises instead of shifting)
+- [x] `channels.py` slot mapping, quality levels, missing-channel mask
+- [x] `features.py` baseline features (scipy; neurokit2 HRV added in `02_baseline`)
+- [x] `preprocess.py` the single raw -> `(signals, mask)` path
+- [x] `splits.py` patient-level check and grouped/stratified validation carve-out
+- [x] `dataset.py`, `synthetic.py`, `display.py`, `metrics.py`, `provenance.py`
+- [x] pytest on synthetic signals
 
-### Stage 3 — backend
-- [x] App skeleton, config, `/health`, `/patients`, `/alarms`
-- [x] MOCK model mode
-- [x] ONNX model wrapper (`OnnxPredictor`, onnxruntime CPU) + latency logging — loader written; its test needs `onnx` installed; tested against the real C4 model (`tests/test_real_model.py`; skipped when the artifacts are absent)
-- [x] `/predict`
-- [x] WebSocket replay (session/chunk/verdict/end)
-- [x] pytest (httpx TestClient, mock mode, synthetic sample) — passing
+### Stage 2 - Colab notebooks (run 2026-10-12)
+- [x] `01_data_prep`: download, label/split checks, header survey of 5,037 records, windows for
+  offsets +2.0 s and 0.0 s, 25-alarm replay sample (only the +2.0 s windows were used for training)
+- [x] `02_baseline`: neurokit2 + scipy features, XGBoost B0 / B1, thresholds on validation, test once
+- [x] `03_cnn`: ResNet1D, C0-C4 and K1-K2 ablations, final C4 chosen by rule, ONNX export,
+  `model_config.json` with both thresholds
+- [x] Artifacts in `models/`, `data/sample/` and `reports/`; ablation tables in `docs/modeling.md`
 
-### Stage 4 — frontend
-- [x] Vite + React + TS + Tailwind scaffold (pnpm; tokens-only theme; strict ESLint incl. jsx-a11y)
-- [x] Backend contract for the UI: `GET /model`, WS pause/resume/speed, `chunk.numerics`, optional `verdict.attribution` (D29, D30)
-- [x] uPlot live waveforms (ECG/PPG/ABP): ring buffers, one instance per strip, shared rAF loop
-- [x] Alarm feed (verdict, confidence, suppressed/escalated), keyboard-navigable
-- [x] Per-channel signal-quality badge; missing-channel strip
-- [x] Summary panel (alarms suppressed/escalated, true alarms caught/missed, false-alarm reduction)
-- [x] Grad-CAM placeholder panel (renders real attribution as soon as the backend sends it)
-- [x] "Simulated real-time (replayed recordings)" label always visible; footer disclaimer
-- [x] Loading / empty / offline / reconnecting / failed states; accessibility pass
-- [x] Tests: ring buffer, verdict mapping, Zod parsing, reconnect logic, VerdictCard, AlarmFeed, missing-channel strip, App integration
-- [ ] Manual check in a real browser on the target laptop (60 fps claim is by design + a CPU probe, not yet measured in-browser)
+### Stage 3 - backend
+- [x] FastAPI app: `/health`, `/model`, `/patients`, `/alarms`, `/alarms/{id}`, `/predict`, `/metrics`
+- [x] ONNX predictor (onnxruntime CPU) and MOCK predictor, per-inference latency logging
+- [x] WebSocket replay: session / chunk / verdict / state / end / error, pause / resume / speed
+- [x] pytest with the FastAPI test client (mock mode, synthetic sample) and real-model smoke tests
 
-### Stage 5 — integrate
-- [x] Swap MOCK -> real ONNX: backend runs with `VTAC_MODEL_MODE=onnx` (2026-10-12; first verdict ~63 ms total, preprocess ~37 ms + infer ~26 ms)
-- [x] Offline sample check on all 25 alarms: 9/10 true escalated, 12/15 false suppressed (one missed: `a06fbf_0500`, p=0.476 vs thr 0.515)
-- [ ] Train/serve parity: `03_cnn` cell 5 exports `parity_batch.npz` (run in the training session, no retraining); `tests/test_onnx_parity.py` is written and skips until the file is in `models/` (PyTorch weights were not saved, so this needs the original Colab runtime)
-- [x] Demo script: `docs/demo.md` (4 alarms, order, what to point at)
-- [x] Sign-off checklist: `docs/checkpoint1-signoff.md`
-- [ ] End-to-end demo on the ~25-alarm sample
+### Stage 4 - frontend
+- [x] Vite + React + TypeScript (strict) + Tailwind (token-only theme) + uPlot + Zustand + Zod
+- [x] Live ECG / PPG / ABP strips from ring buffers and a shared animation frame
+- [x] Alarm feed, verdict card (text + colour), per-channel quality badges, missing-channel strip
+- [x] Session summary (suppressed / escalated, caught / missed, false-alarm reduction)
+- [x] Model card, transport bar (pause / resume / speed), auto-advance
+- [x] Loading / empty / offline / reconnecting / failed states; keyboard and screen-reader pass
+- [x] "SIMULATED REAL-TIME · REPLAYED RECORDINGS" badge and "not for clinical use" footer
+- [x] Vitest suite (26 files, 231 tests passing on 2026-10-18)
 
-## Checkpoint 2 (out of scope for now)
+### Stage 5 - integration and evidence
+- [x] Backend in `onnx` mode serves the real model (`resnet1d-C4_all_dropout-off2.0`)
+- [x] 25-alarm replay-sample check: 9 of 10 true escalated, 12 of 15 false suppressed
+  (`reports/replay_sample_check.json`)
+- [x] Latency measured: warm median 40.3 ms, p95 80.5 ms (`docs/api.md`)
+- [x] Demo script `docs/demo.md`; sign-off checklist `docs/checkpoint1-signoff.md`
+- [x] Plain-language explainers in `docs/explain/`
 
-- [ ] Grad-CAM / saliency explanations on the dashboard
-- [ ] DVC for data and artifact versioning
-- [ ] MLflow / DagsHub experiment tracking
-- [ ] Model registry and promotion flow
-- [ ] Drift monitoring and retrain triggers
-- [ ] Docker (backend + frontend)
-- [ ] CI/CD
+## Open items (documentation or manual checks only)
+
+- [ ] Manual browser check of the full demo on the target laptop (visual correctness, summary counts,
+  frame rate). Not measured so far.
+- [ ] Model card gap (D37): the card shows "not available" / "not evaluated yet" for architecture,
+  baseline, test PR-AUC and Challenge score because `models/model_config.json` lacks
+  `extra.architecture`, `extra.baseline`, `extra.metrics`. Optional fix: add those keys to the
+  gitignored file.
+- [ ] Parity test: 4 tests in `tests/test_onnx_parity.py` skip because `parity_batch.npz` was never
+  exported and the PyTorch weights were not saved (D38).
+
+## Out of scope (not built)
+
+Dropped by decision D32 on 2026-10-18. These do not exist in the repo and must not be claimed.
+
+- Grad-CAM or any attribution / explanation of verdicts (the schema field `verdict.attribution` and
+  a "Where the model looked" box exist, but no values are ever computed or sent)
+- Drift monitoring (signal-quality drift, prediction drift) and retrain triggers
+- Docker images
+- GitHub Actions / CI/CD
+- DVC (data and artifact versioning)
+- MLflow / DagsHub (experiment tracking)
+- Model registry and promotion flow
+- W0 window ablation (offset 0.0 s): never run
+- Multi-seed repeats, external validation, any live monitor integration or clinical validation

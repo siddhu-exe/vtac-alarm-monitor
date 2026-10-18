@@ -40,8 +40,8 @@ MyDrive/vtac/
     xgb_baseline.*      # optional
     model.onnx
     model_config.json   # = VtacConfig.to_dict(): both thresholds, slots, input shape, metrics, vtac ref
-    parity_batch.npz    # ~32 fixed test windows + PyTorch scores, for tests/test_onnx_parity.py
-    model_state.pt      # PyTorch weights of the final model (not committed)
+    parity_batch.npz    # planned (not produced): ~32 fixed test windows + PyTorch scores, for tests/test_onnx_parity.py
+    model_state.pt      # planned (not produced): PyTorch weights of the final model; they were never saved
   reports/              # figures, metrics tables
 ```
 
@@ -59,17 +59,19 @@ not lose work. Run long cells in chunks; write results incrementally.
 ## 4. Exporting to the laptop
 
 1. Download from Drive (web UI, `rclone`, or Drive desktop sync):
-   - `models/model.onnx`, `models/model_config.json`, `models/parity_batch.npz` -> repo `models/`
+   - `models/model.onnx`, `models/model_config.json` -> repo `models/` (`parity_batch.npz` does not exist, see D38)
    - `replay/replay_sample.npz`, `replay/replay_index.json` -> repo `data/sample/`
 2. Files are gitignored; do not commit them.
-3. Start the backend (`VTAC_MODEL_MODE=onnx`, once the ONNX loader lands; until then `mock`); `/health` should report the model version.
+3. Start the backend (`VTAC_MODEL_MODE=onnx`); `/health` should report the model version `resnet1d-C4_all_dropout-off2.0`.
 4. Never copy `windows_off*.npz` or raw data to the laptop; it is large and not needed to serve.
 
 ## 5. Rules
 
 - Preprocessing code is imported from `vtac`; do not paste/duplicate it in notebooks.
 - Fix random seeds (`SEED = 42`) and log them in `windows_meta.json` / `model_config.json`.
-- Run `02_baseline` and `03_cnn` twice, with `OFFSET = 2.0` and `OFFSET = 0.0`, for the window ablation (W1 vs W0).
-- The notebooks were written without being executed; the first Colab run is also a debugging run.
+- Only `OFFSET = 2.0` was run for `02_baseline` and `03_cnn`. The `OFFSET = 0.0` run (ablation W0) was not done (D35); it would overwrite `model.onnx` and `model_config.json`, so back up Drive `models/` first.
+- The three notebooks were run on Colab on 2026-10-12. Their stored outputs were cleared, so the printed
+  results are not in the repo; the saved files in `reports/` and `models/model_config.json` are the record.
+  (The "not yet executed" status lines inside the notebooks are stale.)
 - Notebooks must run top-to-bottom from a fresh runtime (clear outputs before committing).
 - Large notebook outputs/figures go to `reports/` on Drive, not the repo.

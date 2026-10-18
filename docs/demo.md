@@ -1,11 +1,14 @@
-# Demo script (checkpoint 1)
+# Demo script
 
 > Simulated real-time (replayed recordings). Not for clinical use. Say this at the start.
 
 Four alarms from the 25-alarm replay sample, in this order. All four are test-split alarms, so none
 was seen in training. Threshold tau = 0.515 (the constrained one: it keeps validation TPR >= 0.95).
-Scores below are from `models/model.onnx` through the backend's own preprocessing path; the HR,
-pulse-rate and ABP numbers are the dashboard's numerics (`vtac.display.compute_numerics`).
+Scores below are from `models/model.onnx` through the backend's own preprocessing path
+(`reports/replay_sample_check.json`); the HR, pulse-rate and ABP numbers are the dashboard's
+numerics (`vtac.display.compute_numerics`), listed second by second in
+`reports/demo_alarm_numerics.json`. They are display heuristics over the trailing 8 s, so they lag
+the waveform; they are not model inputs and not clinical measurements.
 
 The model scores the 10 s window 292-302 s (alarm onset is 300 s, `window_end_offset_s` = +2.0). The
 verdict card hides the expert label until the verdict arrives.
@@ -28,7 +31,10 @@ Two terminals, started by the presenter (see the sign-off checklist for the full
 2. Frontend with `pnpm dev`, then open http://localhost:5173.
 
 Check first: the header shows the **SIMULATED REAL-TIME · REPLAYED RECORDINGS** badge, the model card
-shows version `resnet1d-C4_all_dropout-off2.0`, and the alarm feed lists 25 alarms.
+shows runtime `onnxruntime (CPU)` and version `resnet1d-C4_all_dropout-off2.0`, and the alarm feed
+lists 25 alarms. The model card's architecture, baseline, test PR-AUC and Challenge-score rows read
+"not available" / "not evaluated yet": a known gap, see `docs/api.md`. Do not read numbers off that
+card; use `docs/modeling.md`.
 
 ## Opening (30 s)
 
@@ -42,8 +48,10 @@ Select it in the alarm feed and let it replay.
 
 Point at:
 - The **ECG** strips around the onset marker ("Monitor alarm onset"): the dashboard cannot derive a
-  steady heart rate from the ECG here (HR shows no value before onset; about 95-103/min after).
-- The **PPG/ABP** strips: the pulse rate stays near 113-115/min (when detected) and ABP stays near 150/52 throughout.
+  steady heart rate from the ECG here (the HR readout is blank from 289 to 296 s, then reads 70-103/min
+  from 297 to 304 s).
+- The **PPG/ABP** strips: the pulse rate stays at 113-115/min whenever it is detected and ABP stays at
+  about 150-153 / 51-56 throughout.
 - The verdict card: **suppressed**, p(true) about 0.16, well under tau.
 - Then the expert label: **False alarm**, agreement shown.
 
@@ -55,8 +63,9 @@ flat samples), so say "degraded" if asked; do not call the signals clean.
 
 Point at:
 - All four slots present (no missing-channel strip).
-- The numerics around onset: HR jumps to about 150-240/min, the PPG pulse rate is gone by
-  300 s, and ABP falls from about 76/68 to about 65/58.
+- The numerics around onset: HR goes from about 89/min to 250/min at 294 s and then settles at
+  150-170/min, the PPG pulse rate is not measurable from 297 s, and ABP falls from about 76/68 to
+  about 65/58 by 300 s.
 - The verdict card: **escalated**, p(true) about 0.86, the highest of any true alarm in the sample.
 - Expert label **True alarm**, agreement.
 
@@ -66,8 +75,9 @@ looks like in these numbers. PPG and ABP are flagged degraded here too.
 ## 3. `108c4d_4582` - a false alarm that was escalated
 
 Point at:
-- Fast ECG rate (HR about 125-130/min) and no PPG pulse rate; ABP numerics disappear after about
-  300 s. In the numbers this looks like a true alarm.
+- Fast ECG rate (HR 119-136/min in most seconds, with excursions to 155-214/min at 288-289 s and
+  293-294 s) and no PPG pulse rate in any second; the ABP readout drops out at 292-294 s and again
+  from 299 s on. In the numbers this looks like a true alarm.
 - Verdict: **escalated**, p(true) about 0.59, only 0.07 above tau.
 - Expert label **False alarm**; the card shows disagreement and the summary counts it under false
   alarms escalated.
@@ -80,9 +90,10 @@ explained why the model, or the monitor, was fooled here; the numbers alone do n
 ## 4. `a06fbf_0500` - the missed true alarm
 
 Point at:
-- The window: HR and pulse rate agree at about 117/min before onset, and ABP sits near 124/57.
-  The change (HR about 155/min, no PPG pulse rate, ABP falling to about 108/56 and then no ABP
-  numeric) only appears after about 295 s, in the second half of the scored window.
+- The window: HR and pulse rate agree at about 117-118/min through 297 s, and ABP sits near
+  123-127 / 57-59. The change (HR 155/min at 300 s, no PPG pulse rate from 300 s, systolic ABP 109
+  at 299 s and 108 at 300 s, then no ABP readout at 301-302 s) only appears from about 298 s, in the
+  last few seconds of the scored window (292-302 s).
 - The verdict card: **suppressed**, p(true) 0.476, which is **0.039 below** tau (0.515).
 - Expert label **True alarm**; disagreement. The summary shows one true alarm missed.
 
@@ -100,8 +111,8 @@ guarantee.
 
 Point at the **summary panel** after all four: 2 escalated, 2 suppressed; 1 true alarm
 caught, 1 missed, 1 false alarm escalated, 1 false alarm suppressed. Repeat: simulated replay of recorded data,
-not connected to any monitor, not for clinical use. The Grad-CAM panel ("Where the model looked") is a
-placeholder for checkpoint 2.
+not connected to any monitor, not for clinical use. The "Where the model looked" box only shows a note
+that no attribution is computed; no explanation of the verdict exists.
 
 ## If something goes wrong
 
