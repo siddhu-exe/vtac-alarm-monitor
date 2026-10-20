@@ -61,7 +61,7 @@ not lose work. Run long cells in chunks; write results incrementally.
 1. Download from Drive (web UI, `rclone`, or Drive desktop sync):
    - `models/model.onnx`, `models/model_config.json` -> repo `models/` (`parity_batch.npz` does not exist, see D38)
    - `replay/replay_sample.npz`, `replay/replay_index.json` -> repo `data/sample/`
-2. Files are gitignored; do not commit them.
+2. `model.onnx` and `model_config.json` are tracked (D39, ~2 MB); commit them when retrained. Everything else (baseline `.ubj`, replay sample) stays gitignored.
 3. Start the backend (`VTAC_MODEL_MODE=onnx`); `/health` should report the model version `resnet1d-C4_all_dropout-off2.0`.
 4. Never copy `windows_off*.npz` or raw data to the laptop; it is large and not needed to serve.
 

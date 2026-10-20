@@ -25,6 +25,9 @@ data/sample/*
 models/*
 !models/.gitkeep
 *.onnx
+# Served CNN is ~2 MB and tracked on purpose (the baseline .ubj and replay sample stay ignored)
+!models/model.onnx
+!models/model_config.json
 *.pt
 *.pth
 *.ubj

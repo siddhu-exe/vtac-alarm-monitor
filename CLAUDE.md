@@ -33,7 +33,7 @@ Artifacts flow Colab -> Google Drive -> laptop (`models/`, `data/sample/`). See
 - `notebooks/` — `01_data_prep`, `02_baseline`, `03_cnn` (Colab).
 - `backend/` — FastAPI app: REST, WebSocket replay, MOCK model mode, latency logging.
 - `frontend/` — Vite + React + TypeScript + Tailwind + uPlot.
-- `data/sample/` — replay sample (gitignored except README). `models/` — gitignored.
+- `data/sample/` — replay sample (gitignored except README). `models/` — gitignored except the served `model.onnx` + `model_config.json`.
 - `tests/` — pytest. `docs/` — architecture, data, modeling, api, roadmap, decisions, colab-workflow.
 
 ## Commands
@@ -102,7 +102,8 @@ then use it in both places.
 
 - Never run training, ablations, full-dataset download/processing, or ONNX export on the laptop.
 - Never duplicate or fork preprocessing outside `src/vtac/`.
-- Never commit data, `.npz`, `.onnx`, model weights, or secrets (`.gitignore` covers these).
+- Never commit data, `.npz`, other `.onnx`/model weights, or secrets (`.gitignore` covers these).
+  The one exception is the served ~2 MB `models/model.onnx` + `model_config.json` (D39).
 - Never assume dataset column names, sampling rates, or channel names — verify and document.
 - Never split data randomly; use the official split and confirm it is patient-level.
 - Never tune the threshold or select models on the test set.

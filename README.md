@@ -50,6 +50,22 @@ Details, validation numbers and ablations: [docs/modeling.md](docs/modeling.md).
 | XGBoost, all features (B1) | 0.971 (133 of 137) | 0.603 (208 of 345) | 4 / 137 | 0.742 | 0.685 (0.616-0.746) |
 | **ResNet1D, served (C4)** | **0.964 (132 of 137)** | **0.806 (278 of 345)** | **5 / 67** | **0.875** | **0.817 (0.767-0.867)** |
 
+### Confusion matrix (served CNN, test set, τ = 0.515)
+
+![Confusion matrix of the served ResNet1D on the 482-alarm test set](reports/confusion_matrix.png)
+
+| | Predicted: escalate | Predicted: suppress | Total |
+|---|---|---|---|
+| **Actually true (VT)** | 132 (TP) | 5 (FN, missed) | 137 |
+| **Actually false** | 67 (FP) | 278 (TN) | 345 |
+
+- Staff see 199 alarms instead of 482 (59% fewer).
+- PPV is 0.663: about 2 in 3 escalated alarms are real, against 0.284 with no model.
+- A miss costs 5 false alarms in the Challenge Score, so the 5 misses matter more than the 67
+  false escalations.
+
+Regenerate the image with `uv run --with matplotlib python reports/plot_confusion_matrix.py`.
+
 At the served threshold the CNN keeps about the same recall as the best baseline with about half the
 false alarms. The 95% intervals come from a patient-level bootstrap and are wide: the test TPR is an
 estimate, not a guarantee. All results are one training run (one seed).
@@ -71,9 +87,9 @@ dashboard shows this miss on purpose. Why the model scored it 0.476 is not known
 
 ## Run the demo
 
-Prerequisites: Python 3.11, [uv](https://docs.astral.sh/uv/), Node 20.19+, pnpm. The model and the
-replay sample are **not in git**; copy them from Google Drive (`MyDrive/vtac/`):
-`models/model.onnx`, `models/model_config.json` -> `models/`, and `replay/replay_sample.npz`,
+Prerequisites: Python 3.11, [uv](https://docs.astral.sh/uv/), Node 20.19+, pnpm. The model
+(`models/model.onnx`, ~2 MB, and `models/model_config.json`) is **in git**. The replay sample is
+not; copy it from Google Drive (`MyDrive/vtac/`): `replay/replay_sample.npz`,
 `replay/replay_index.json` -> `data/sample/`.
 
 ```bash
@@ -123,7 +139,7 @@ not changed.
 | `frontend/` | Vite + React + TypeScript + Tailwind + uPlot dashboard |
 | `reports/` | Saved metrics and measurements the docs cite |
 | `data/sample/` | 25-alarm replay sample (gitignored) |
-| `models/` | ONNX model + config (gitignored) |
+| `models/` | ONNX model + config (tracked, ~2 MB) |
 | `tests/` | pytest |
 | `docs/` | Technical docs, and `docs/explain/` plain-language guides for presenting |
 

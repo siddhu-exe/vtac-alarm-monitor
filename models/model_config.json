@@ -1,0 +1,149 @@
+{
+  "fs": 250,
+  "segment_samples": 90000,
+  "alarm_onset_s": 300.0,
+  "channel_slots": [
+    "ECG_1",
+    "ECG_2",
+    "PPG",
+    "ABP"
+  ],
+  "window_s": 10.0,
+  "window_end_offset_s": 2.0,
+  "context_s": 10.0,
+  "ecg_priority": [
+    "II",
+    "V",
+    "aVR",
+    "I",
+    "III",
+    "aVL",
+    "aVF",
+    "V1",
+    "MCL1"
+  ],
+  "ppg_names": [
+    "PLETH",
+    "PPG"
+  ],
+  "abp_names": [
+    "ABP",
+    "ART"
+  ],
+  "notch_hz": 60.0,
+  "notch_q": 30.0,
+  "ecg_highpass_hz": 1.0,
+  "ecg_lowpass_hz": 30.0,
+  "ecg_order": 2,
+  "ppg_band_hz": [
+    0.5,
+    5.0
+  ],
+  "ppg_order": 1,
+  "abp_lowpass_hz": 16.0,
+  "abp_order": 2,
+  "max_nan_frac": 0.5,
+  "degraded_nan_frac": 0.05,
+  "max_gap_s": 1.0,
+  "flat_diff_frac": 0.9,
+  "degraded_flat_frac": 0.3,
+  "min_std": 1e-06,
+  "numerics_window_s": 8.0,
+  "numerics_every_s": 1.0,
+  "numerics_min_beats": 3,
+  "numerics_rate_bounds_bpm": [
+    20.0,
+    300.0
+  ],
+  "numerics_abp_bounds_mmhg": [
+    10.0,
+    300.0
+  ],
+  "numerics_ecg_min_rr_s": 0.2,
+  "numerics_ecg_height_frac": 0.5,
+  "numerics_pulse_min_rr_s": 0.25,
+  "numerics_pulse_prominence_frac": 0.3,
+  "numerics_pulse_min_autocorr": 0.4,
+  "tpr_target": 0.95,
+  "threshold": 0.5148199200630188,
+  "threshold_constrained": 0.5148199200630188,
+  "threshold_unconstrained": 0.5606065988540649,
+  "model_version": "resnet1d-C4_all_dropout-off2.0",
+  "vtac_git_ref": "6d30bd26a7e2e7dc149b069c0c111d701fc66325",
+  "extra": {
+    "final_run": "C4_all_dropout",
+    "imbalance": "focal",
+    "dropout_aug": 0.15,
+    "seed": 42,
+    "val": {
+      "constrained": {
+        "threshold": 0.5148199200630188,
+        "tp": 134,
+        "tn": 282,
+        "fp": 72,
+        "fn": 7,
+        "tpr": 0.950354609929078,
+        "tnr": 0.7966101694915254,
+        "ppv": 0.6504854368932039,
+        "challenge_score": 0.7954110898661568,
+        "pr_auc": 0.8862881046638612,
+        "roc_auc": 0.9446848579556838,
+        "tpr_target": 0.95
+      },
+      "unconstrained": {
+        "threshold": 0.5606065988540649,
+        "tp": 130,
+        "tn": 308,
+        "fp": 46,
+        "fn": 11,
+        "tpr": 0.9219858156028369,
+        "tnr": 0.8700564971751412,
+        "ppv": 0.7386363636363636,
+        "challenge_score": 0.8126159554730983,
+        "pr_auc": 0.8862881046638612,
+        "roc_auc": 0.9446848579556838
+      }
+    },
+    "test": {
+      "constrained": {
+        "threshold": 0.5148199200630188,
+        "tp": 132,
+        "tn": 278,
+        "fp": 67,
+        "fn": 5,
+        "tpr": 0.9635036496350365,
+        "tnr": 0.8057971014492754,
+        "ppv": 0.6633165829145728,
+        "challenge_score": 0.8167330677290837,
+        "pr_auc": 0.8747448686387853,
+        "roc_auc": 0.9459430868507352,
+        "challenge_ci95": [
+          0.7665884312537855,
+          0.8670546954413949
+        ]
+      },
+      "unconstrained": {
+        "threshold": 0.5606065988540649,
+        "tp": 125,
+        "tn": 294,
+        "fp": 51,
+        "fn": 12,
+        "tpr": 0.9124087591240876,
+        "tnr": 0.8521739130434782,
+        "ppv": 0.7102272727272727,
+        "challenge_score": 0.7905660377358491,
+        "pr_auc": 0.8747448686387853,
+        "roc_auc": 0.9459430868507352,
+        "challenge_ci95": [
+          0.7100548479541474,
+          0.8673517288981093
+        ]
+      }
+    }
+  },
+  "input_shape": [
+    "N",
+    4,
+    2500
+  ]
+}
